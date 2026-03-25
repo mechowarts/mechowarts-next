@@ -1,0 +1,5 @@
+export { AuthenticationPage } from '@/features/auth/authentication-page'
+export { LoginPage } from '@/features/auth/login-page'
+export { ProgressiveAuthPage } from '@/features/auth/progressive-auth-page'
+export { ResetPasswordPage } from '@/features/auth/reset-password-page'
+export { VerifyEmailPage } from '@/features/auth/verify-email-page'

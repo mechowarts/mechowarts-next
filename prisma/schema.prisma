@@ -1,0 +1,111 @@
+generator client {
+  provider = "prisma-client"
+  output   = "../src/lib/.db"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+model User {
+  id            String   @id
+  name          String
+  email         String   @unique
+  emailVerified Boolean  @default(false)
+  image         String?
+  createdAt     DateTime @default(now())
+  updatedAt     DateTime @updatedAt
+
+  rollNumber  Int?    @unique
+  avatarUrl   String  @default("")
+  bio         String  @default("")
+  bloodGroup  String?
+  homeTown    String?
+  phone       String?
+  facebookUrl String?
+  isPublic    Boolean @default(true)
+
+  sessions     Session[]
+  accounts     Account[]
+  posts        Post[]            @relation("PostAuthor")
+  savedPosts   PostSave[]
+  institutions UserInstitution[]
+}
+
+model Session {
+  id        String   @id
+  expiresAt DateTime
+  token     String   @unique
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+  ipAddress String?
+  userAgent String?
+  userId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Account {
+  id                    String    @id
+  accountId             String
+  providerId            String
+  userId                String
+  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
+  accessToken           String?
+  refreshToken          String?
+  idToken               String?
+  accessTokenExpiresAt  DateTime?
+  refreshTokenExpiresAt DateTime?
+  scope                 String?
+  password              String?
+  createdAt             DateTime  @default(now())
+  updatedAt             DateTime  @updatedAt
+
+  @@unique([providerId, accountId])
+}
+
+model Verification {
+  id         String   @id
+  identifier String
+  value      String
+  expiresAt  DateTime
+  createdAt  DateTime @default(now())
+  updatedAt  DateTime @updatedAt
+}
+
+model Post {
+  id        String   @id @default(cuid())
+  authorId  String
+  author    User     @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+  caption   String
+  location  String?
+  imageUrl  String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  saves PostSave[]
+}
+
+model PostSave {
+  userId    String
+  postId    String
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
+  createdAt DateTime @default(now())
+
+  @@id([userId, postId])
+}
+
+model UserInstitution {
+  id        String          @id @default(cuid())
+  userId    String
+  user      User            @relation(fields: [userId], references: [id], onDelete: Cascade)
+  kind      InstitutionKind
+  name      String
+  location  String?
+  sortOrder Int             @default(0)
+}
+
+enum InstitutionKind {
+  college
+  school
+}

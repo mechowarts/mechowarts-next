@@ -1,0 +1,119 @@
+<svg width="720" height="1024" viewBox="0 0 720 1024" fill="none" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Gradient Background -->
+  <defs>
+    <linearGradient id="bgGradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#5d5fef;stop-opacity:0.1" />
+      <stop offset="50%" style="stop-color:#877eff;stop-opacity:0.15" />
+      <stop offset="100%" style="stop-color:#ffb620;stop-opacity:0.1" />
+    </linearGradient>
+
+    <linearGradient id="cardGradient1" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#877eff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#5d5fef;stop-opacity:0.6" />
+    </linearGradient>
+
+    <linearGradient id="cardGradient2" x1="0%" y1="0%" x2="0%" y2="100%">
+      <stop offset="0%" style="stop-color:#ffb620;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#ff5a5a;stop-opacity:0.5" />
+    </linearGradient>
+
+    <linearGradient id="glowGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+      <stop offset="0%" style="stop-color:#877eff;stop-opacity:0" />
+      <stop offset="50%" style="stop-color:#877eff;stop-opacity:0.3" />
+      <stop offset="100%" style="stop-color:#877eff;stop-opacity:0" />
+    </linearGradient>
+
+    <!-- Pattern for tech grid -->
+    <pattern id="techGrid" x="0" y="0" width="60" height="60" patternUnits="userSpaceOnUse">
+      <path d="M 60 0 L 0 0 0 60" fill="none" stroke="#877eff" stroke-width="0.5" opacity="0.2"/>
+      <circle cx="0" cy="0" r="1.5" fill="#877eff" opacity="0.3"/>
+      <circle cx="60" cy="60" r="1.5" fill="#877eff" opacity="0.3"/>
+    </pattern>
+
+    <!-- Glow filter -->
+    <filter id="glow">
+      <feGaussianBlur stdDeviation="3" result="coloredBlur"/>
+      <feMerge>
+        <feMergeNode in="coloredBlur"/>
+        <feMergeNode in="SourceGraphic"/>
+      </feMerge>
+    </filter>
+  </defs>
+
+  <!-- Tech grid pattern overlay -->
+  <rect width="720" height="1024" fill="url(#techGrid)" opacity="0.4"/>
+
+  <!-- Large tilted background shape -->
+  <rect x="90" y="-150" width="800" height="1300" rx="40" fill="url(#bgGradient)" transform="rotate(12 360 512)" opacity="0.6"/>
+
+  <!-- Floating geometric cards -->
+  <!-- Card 1 - Top Left -->
+  <g transform="translate(80, 120) rotate(8)" opacity="0.9">
+    <rect x="0" y="0" width="280" height="220" rx="20" fill="#1f1f22" stroke="#877eff" stroke-width="2" opacity="0.8"/>
+    <rect x="0" y="0" width="280" height="220" rx="20" fill="url(#cardGradient1)"/>
+    <circle cx="140" cy="110" r="40" fill="none" stroke="#877eff" stroke-width="3" opacity="0.6"/>
+    <path d="M 140 85 L 140 135 M 115 110 L 165 110" stroke="#877eff" stroke-width="3" stroke-linecap="round"/>
+    <circle cx="140" cy="110" r="12" fill="#ffb620"/>
+  </g>
+
+  <!-- Card 2 - Center -->
+  <g transform="translate(220, 380) rotate(-5)" opacity="0.95">
+    <rect x="0" y="0" width="320" height="260" rx="24" fill="#1f1f22" stroke="#ffb620" stroke-width="2" opacity="0.9"/>
+    <rect x="0" y="0" width="320" height="260" rx="24" fill="url(#cardGradient2)"/>
+    <!-- Gear icon -->
+    <g transform="translate(160, 130)">
+      <circle cx="0" cy="0" r="45" fill="none" stroke="#ffb620" stroke-width="4"/>
+      <path d="M 0 -45 L 0 -55 M 45 0 L 55 0 M 0 45 L 0 55 M -45 0 L -55 0" stroke="#ffb620" stroke-width="5" stroke-linecap="round"/>
+      <path d="M 32 -32 L 40 -40 M 32 32 L 40 40 M -32 32 L -40 40 M -32 -32 L -40 -40" stroke="#ffb620" stroke-width="5" stroke-linecap="round"/>
+      <circle cx="0" cy="0" r="18" fill="#877eff"/>
+      <circle cx="0" cy="0" r="8" fill="#ff5a5a"/>
+    </g>
+  </g>
+
+  <!-- Card 3 - Bottom Right -->
+  <g transform="translate(380, 720) rotate(10)" opacity="0.9">
+    <rect x="0" y="0" width="260" height="200" rx="20" fill="#1f1f22" stroke="#877eff" stroke-width="2" opacity="0.8"/>
+    <rect x="0" y="0" width="260" height="200" rx="20" fill="url(#cardGradient1)"/>
+    <!-- Circuit board pattern -->
+    <g stroke="#877eff" stroke-width="2.5" opacity="0.6">
+      <line x1="40" y1="100" x2="100" y2="100"/>
+      <line x1="160" y1="100" x2="220" y2="100"/>
+      <line x1="70" y1="80" x2="70" y2="120"/>
+      <line x1="190" y1="80" x2="190" y2="120"/>
+      <circle cx="70" cy="100" r="6" fill="#ffb620"/>
+      <circle cx="130" cy="100" r="6" fill="#ffb620"/>
+      <circle cx="190" cy="100" r="6" fill="#ffb620"/>
+    </g>
+  </g>
+
+  <!-- Floating particles -->
+  <circle cx="150" cy="300" r="3" fill="#877eff" opacity="0.6" filter="url(#glow)"/>
+  <circle cx="520" cy="180" r="2" fill="#ffb620" opacity="0.7"/>
+  <circle cx="600" cy="450" r="2.5" fill="#877eff" opacity="0.5"/>
+  <circle cx="180" cy="650" r="2" fill="#ffb620" opacity="0.6"/>
+  <circle cx="480" cy="580" r="3" fill="#d0dfff" opacity="0.4"/>
+  <circle cx="320" cy="240" r="2" fill="#ffb620" opacity="0.5"/>
+  <circle cx="90" cy="820" r="2.5" fill="#877eff" opacity="0.6"/>
+
+  <!-- Decorative lines -->
+  <line x1="100" y1="500" x2="180" y2="520" stroke="url(#glowGradient)" stroke-width="2" opacity="0.4"/>
+  <line x1="500" y1="300" x2="580" y2="280" stroke="url(#glowGradient)" stroke-width="2" opacity="0.4"/>
+
+  <!-- Lightning bolt accent -->
+  <path d="M 550 650 L 565 680 L 555 680 L 570 710" stroke="#ffb620" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" opacity="0.5" filter="url(#glow)"/>
+
+  <!-- Small decorative hexagons -->
+  <g opacity="0.3">
+    <path d="M 620 200 L 630 205 L 630 215 L 620 220 L 610 215 L 610 205 Z" fill="none" stroke="#877eff" stroke-width="1.5"/>
+    <path d="M 140 880 L 150 885 L 150 895 L 140 900 L 130 895 L 130 885 Z" fill="none" stroke="#ffb620" stroke-width="1.5"/>
+    <path d="M 80 450 L 90 455 L 90 465 L 80 470 L 70 465 L 70 455 Z" fill="none" stroke="#877eff" stroke-width="1.5"/>
+  </g>
+
+  <!-- Glowing orbs in corners -->
+  <circle cx="60" cy="960" r="8" fill="#877eff" opacity="0.4" filter="url(#glow)"/>
+  <circle cx="660" cy="64" r="8" fill="#ffb620" opacity="0.4" filter="url(#glow)"/>
+
+  <!-- Bottom accent bar -->
+  <rect x="0" y="1000" width="720" height="24" fill="url(#glowGradient)" opacity="0.3"/>
+</svg>
