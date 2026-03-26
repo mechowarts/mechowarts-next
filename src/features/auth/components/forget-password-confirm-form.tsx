@@ -85,7 +85,7 @@ export function ForgetPasswordConfirmForm({
         </div>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 ">
         <Button
           type="button"
           variant="ghost"
@@ -98,7 +98,7 @@ export function ForgetPasswordConfirmForm({
 
         <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-start gap-3 text-left">
-            <div className="rounded-2xl bg-white p-2 text-slate-700 shadow-sm ring-1 ring-slate-200">
+            <div className="rounded-2xl bg-white p-2 text-slate-700  ring-1 ring-slate-200">
               <MailCheck className="size-5" />
             </div>
             <div>

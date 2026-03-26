@@ -74,7 +74,7 @@ export function ForgetPasswordRequestForm({
 
       <Form {...form}>
         <form
-          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
+          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 "
           onSubmit={form.handleSubmit(({ roll }) => {
             requestOtpMutation.mutate(
               {
