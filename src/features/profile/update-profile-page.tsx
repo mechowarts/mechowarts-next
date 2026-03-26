@@ -29,7 +29,7 @@ import { useAuthStore } from '@/store/use-auth-store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { openFileExplorer } from 'daily-code/browser'
 import { useRouter } from 'next/navigation'
-import { useEffect, useRef, useState } from 'react'
+import { useRef, useState } from 'react'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -111,12 +111,6 @@ export function UpdateProfilePage() {
   })
   const isSubmitting =
     updateProfileMutation.isPending || uploadAvatarMutation.isPending
-
-  useEffect(() => {
-    return () => {
-      revokeObjectUrl(avatarObjectUrlRef.current)
-    }
-  }, [])
 
   return (
     <div className="flex flex-1">

@@ -86,7 +86,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
             <Button
               variant="outline"
               onClick={() => {
-                router.push('/authentication')
+                router.push('/login')
               }}
             >
               Log In

@@ -109,7 +109,7 @@ export function AppSidebar() {
             variant="outline"
             className="flex flex-1 items-center justify-center gap-2 py-6"
             onClick={() => {
-              router.push('/authentication')
+              router.push('/login')
             }}
           >
             <FaSignInAlt className="h-5 w-5" />

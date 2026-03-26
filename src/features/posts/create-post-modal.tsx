@@ -14,7 +14,6 @@ import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
 import { createPost } from '@/server/actions/posts.actions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
-import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
@@ -37,12 +36,6 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
       await queryClient.invalidateQueries({ queryKey: ['posts'] })
     },
   })
-
-  useEffect(() => {
-    if (!isOpen) {
-      form.reset()
-    }
-  }, [form, isOpen])
 
   return (
     <BetterDialog open={isOpen} onOpenChange={(open) => !open && onClose()}>

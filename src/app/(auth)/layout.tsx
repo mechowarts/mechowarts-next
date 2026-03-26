@@ -5,41 +5,43 @@ import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { cn } from '@/lib/utils'
 import { useAuthStore } from '@/store/use-auth-store'
-import { KeyRound, ShieldCheck } from 'lucide-react'
+import { KeyRound, ShieldCheck, UserPlus } from 'lucide-react'
 import Link from 'next/link'
-import { usePathname, useRouter } from 'next/navigation'
-import { PropsWithChildren, useEffect } from 'react'
+import { redirect, RedirectType, usePathname } from 'next/navigation'
+import { PropsWithChildren } from 'react'
 
 const authLinks = [
   {
-    description: 'Sign in or create a new account',
-    href: '/authentication',
+    description: 'Start with roll lookup, then sign in',
+    href: '/login',
     icon: ShieldCheck,
-    label: 'Account access',
+    label: 'Login',
   },
   {
-    description: 'Reset your password with email OTP',
-    href: '/reset-password',
+    description: 'Create an account and verify with OTP',
+    href: '/register',
+    icon: UserPlus,
+    label: 'Register',
+  },
+  {
+    description: 'Recover access with OTP and a new password',
+    href: '/forgot-password',
     icon: KeyRound,
-    label: 'Recover password',
+    label: 'Forget Password',
   },
 ]
 
 export default function AuthenticationLayout({ children }: PropsWithChildren) {
   const pathname = usePathname()
-  const router = useRouter()
   const status = useAuthStore((store) => store.status)
   const isLoading = status === 'loading'
-  const isAuthenticated = status === 'authenticated'
-  const isResetPage = pathname === '/reset-password'
+  const isRecoveryPage = pathname.startsWith('/forgot-password')
 
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.replace('/')
-    }
-  }, [isAuthenticated, router])
+  if (status === 'authenticated') {
+    return redirect('/', RedirectType.replace)
+  }
 
-  if (isLoading || isAuthenticated) {
+  if (isLoading) {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Spinner className="size-8" />
@@ -56,9 +58,9 @@ export default function AuthenticationLayout({ children }: PropsWithChildren) {
               <div>
                 <Logo className="h-10 w-40 sm:h-11 sm:w-44" />
                 <p className="mt-3 max-w-xl text-sm leading-6 text-slate-600">
-                  {isResetPage
-                    ? 'Recover access securely with email verification and a fresh password.'
-                    : 'Use your RUET roll to sign in, register, or move between auth flows without losing context.'}
+                  {isRecoveryPage
+                    ? 'Recover access securely with an OTP, choose a new password, and get back in without extra steps.'
+                    : 'Use your RUET roll to move cleanly between login and registration without losing your place.'}
                 </p>
               </div>
 
@@ -71,9 +73,7 @@ export default function AuthenticationLayout({ children }: PropsWithChildren) {
               {authLinks.map((item) => {
                 const Icon = item.icon
                 const isActive =
-                  item.href === '/authentication'
-                    ? pathname.startsWith('/authentication')
-                    : pathname === item.href
+                  pathname === item.href || pathname.startsWith(`${item.href}/`)
 
                 return (
                   <Link
@@ -120,7 +120,7 @@ export default function AuthenticationLayout({ children }: PropsWithChildren) {
           <div className="flex flex-col gap-3 text-sm text-slate-600 sm:flex-row sm:items-center sm:justify-between">
             <p>Need a clean start? Return to the main auth flow at any time.</p>
             <Button asChild variant="link" className="h-auto px-0 text-sm">
-              <Link href="/authentication">Start over</Link>
+              <Link href="/login">Start over</Link>
             </Button>
           </div>
         </div>
@@ -134,19 +134,20 @@ export default function AuthenticationLayout({ children }: PropsWithChildren) {
               MechoWarts access
             </p>
             <h2 className="text-4xl leading-tight font-semibold">
-              Move from roll lookup to recovery without the usual auth maze.
+              Clear auth screens, one flow per job, and no dead ends.
             </h2>
             <p className="text-base leading-7 text-slate-300">
-              Registration now starts with an email OTP, password creation, and
-              the profile details you actually need up front.
+              Login starts with roll lookup, registration carries the roll into
+              the form automatically, and recovery signs you back in after the
+              reset is done.
             </p>
           </div>
 
           <div className="space-y-3 rounded-[28px] border border-white/10 bg-white/5 p-6 backdrop-blur">
-            <p className="text-sm font-semibold text-white">What changed</p>
+            <p className="text-sm font-semibold text-white">Now available</p>
             <p className="text-sm leading-7 text-slate-300">
-              Cleaner routing, clearer progress, and recovery built around your
-              student email instead of guesswork.
+              Dedicated login, register, and password recovery pages with OTP
+              verification built around your student email.
             </p>
           </div>
         </div>

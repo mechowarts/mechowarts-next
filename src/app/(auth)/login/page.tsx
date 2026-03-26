@@ -2,6 +2,6 @@
 
 import { LoginPage } from '@/features/auth/login-page'
 
-export default function LoginRoutePage() {
+export default function AuthenticationRoutePage() {
   return <LoginPage />
 }
