@@ -39,9 +39,9 @@ type RegisterData = {
   bio: string
   bloodGroup: string
   confirmPassword: string
-  facebookUrl: string
+  facebookId: string
   firstName: string
-  homeTown: string
+  location: string
   lastName: string
   otp: string
   password: string
@@ -75,9 +75,9 @@ export function ProgressiveRegisterStep({
       bio: '',
       bloodGroup: '',
       confirmPassword: '',
-      facebookUrl: '',
+      facebookId: '',
       firstName: '',
-      homeTown: '',
+      location: '',
       lastName: '',
       otp: '',
       password: '',
@@ -402,11 +402,11 @@ export function ProgressiveRegisterStep({
 
               <FormField
                 control={form.control}
-                name="homeTown"
-                rules={{ required: 'Home town is required.' }}
+                name="location"
+                rules={{ required: 'Location is required.' }}
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Home town</FormLabel>
+                    <FormLabel>Location</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
@@ -461,29 +461,15 @@ export function ProgressiveRegisterStep({
 
               <FormField
                 control={form.control}
-                name="facebookUrl"
-                rules={{
-                  validate: (value) => {
-                    if (!value) {
-                      return true
-                    }
-
-                    try {
-                      new URL(value)
-                      return true
-                    } catch {
-                      return 'Enter a valid URL.'
-                    }
-                  },
-                }}
+                name="facebookId"
                 render={({ field }) => (
                   <FormItem>
-                    <FormLabel>Facebook URL</FormLabel>
+                    <FormLabel>Facebook</FormLabel>
                     <FormControl>
                       <Input
                         {...field}
-                        type="url"
-                        placeholder="https://facebook.com/yourprofile"
+                        type="text"
+                        placeholder="facebook username"
                         disabled={isBusy}
                       />
                     </FormControl>

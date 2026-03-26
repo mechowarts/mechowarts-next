@@ -4,16 +4,13 @@ import OneTimeJwt from 'one-time-jwt'
 
 export const authOtpTokenLimit = 5
 
-const registerOtpJwt = new OneTimeJwt(
-  `${serverEnv.BETTER_AUTH_SECRET}:register-otp`,
-  {
-    logLevel: 'silent',
-    maxTokenLimitPerPurpose: authOtpTokenLimit,
-  }
-)
+const registerOtpJwt = new OneTimeJwt(serverEnv.JWT_REGISTER_SECRET, {
+  logLevel: 'silent',
+  maxTokenLimitPerPurpose: authOtpTokenLimit,
+})
 
 const resetPasswordOtpJwt = new OneTimeJwt(
-  `${serverEnv.BETTER_AUTH_SECRET}:reset-password-otp`,
+  serverEnv.JWT_RESET_PASSWORD_SECRET,
   {
     logLevel: 'silent',
     maxTokenLimitPerPurpose: authOtpTokenLimit,
@@ -67,7 +64,7 @@ export async function verifyRegisterOtp(tokens: string[], otp: string) {
 }
 
 export async function createResetPasswordOtp(data: {
-  accountUpdatedAt: string
+  passwordChangedAt: null | string
   rollNumber: number
   userId: string
 }) {
@@ -75,7 +72,7 @@ export async function createResetPasswordOtp(data: {
   const result = await resetPasswordOtpJwt.createToken(
     'reset-password',
     {
-      accountUpdatedAt: data.accountUpdatedAt,
+      passwordChangedAt: data.passwordChangedAt,
       email,
       requestedAt: new Date().toISOString(),
       rollNumber: data.rollNumber,
@@ -98,7 +95,7 @@ export async function createResetPasswordOtp(data: {
 export async function verifyResetPasswordOtp(tokens: string[], otp: string) {
   try {
     return await resetPasswordOtpJwt.verifyToken<{
-      accountUpdatedAt: string
+      passwordChangedAt: null | string
       email: string
       requestedAt: string
       rollNumber: number

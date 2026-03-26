@@ -21,10 +21,10 @@ export async function changeUserAvatar(input: File) {
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { avatarUrl: result },
+    data: { avatar: result },
   })
 
-  return { avatarUrl: result }
+  return { avatar: result }
 }
 
 export async function removeUserAvatar() {
@@ -32,8 +32,8 @@ export async function removeUserAvatar() {
 
   await prisma.user.update({
     where: { id: session.user.id },
-    data: { avatarUrl: null },
+    data: { avatar: null },
   })
 
-  return { avatarUrl: '' }
+  return { avatar: '' }
 }

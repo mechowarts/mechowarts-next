@@ -25,7 +25,7 @@ type ProfileData = {
   bloodGroup: string
   colleges: Array<{ location?: string; name: string }>
   facebook?: string
-  homeTown: string
+  location: string
   name: string
   schools: Array<{ location?: string; name: string }>
   whatsapp?: string
@@ -49,7 +49,7 @@ export function ProgressiveProfileStep({
       bloodGroup: '',
       colleges: [{ location: '', name: '' }],
       facebook: '',
-      homeTown: '',
+      location: '',
       name: '',
       schools: [{ location: '', name: '' }],
       whatsapp: '',
@@ -127,14 +127,14 @@ export function ProgressiveProfileStep({
 
         <FormField
           control={form.control}
-          name="homeTown"
+          name="location"
           render={({ field }) => (
             <FormItem>
               <FormControl>
                 <Input
                   {...field}
                   type="text"
-                  placeholder="Your home town"
+                  placeholder="Your location"
                   disabled={isLoading}
                 />
               </FormControl>

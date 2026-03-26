@@ -9,12 +9,39 @@ import {
   verifyRegisterOtp,
   verifyResetPasswordOtp,
 } from '@/server/helpers/auth-otp'
-import { auth } from '@/server/lib/auth'
+import { getSession } from '@/server/helpers/session'
 import { sendOtpEmail } from '@/server/lib/mailer'
-import { hashPassword } from '@/server/lib/password'
+import { hashPassword, verifyPassword } from '@/server/lib/password'
 import { prisma } from '@/server/lib/prisma'
+import { clearSessionCookie, setSessionCookie } from '@/server/lib/session-auth'
 import { buildStudentEmail } from '@/utils/roll'
+import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
+
+function parseFacebookId(value: string | undefined) {
+  if (!value) {
+    return undefined
+  }
+
+  const trimmed = value.trim()
+
+  if (!trimmed) {
+    return undefined
+  }
+
+  if (!trimmed.includes('/')) {
+    return trimmed
+  }
+
+  try {
+    const url = new URL(trimmed)
+    const pathSegment = url.pathname.split('/').filter(Boolean).at(-1)
+
+    return pathSegment || undefined
+  } catch {
+    return trimmed
+  }
+}
 
 const requestOtpSchema = z.object({
   rollNumber: z.number().int().positive(),
@@ -28,8 +55,8 @@ const verifyOtpSchema = z.object({
 const registerSchema = z.object({
   bio: z.string().optional(),
   bloodGroup: z.string().min(1),
-  facebookUrl: z.union([z.literal(''), z.url()]).optional(),
-  homeTown: z.string().min(1),
+  facebookId: z.string().optional(),
+  location: z.string().min(1),
   name: z.string().min(1),
   otp: z.string().length(6),
   password: z.string().min(8),
@@ -44,6 +71,52 @@ const resetPasswordSchema = z.object({
   tokens: z.array(z.string().min(1)).min(1).max(authOtpTokenLimit),
 })
 
+const signInSchema = z.object({
+  password: z.string().min(1),
+  rollNumber: z.number().int().positive(),
+})
+
+export async function getSessionAction() {
+  return getSession()
+}
+
+export async function signOutAction() {
+  await clearSessionCookie()
+  return { success: true }
+}
+
+export async function signInAction(input: z.infer<typeof signInSchema>) {
+  const body = signInSchema.parse(input)
+  const user = await prisma.user.findUnique({
+    where: { roll: body.rollNumber },
+    select: {
+      id: true,
+      password: true,
+      passwordChangedAt: true,
+    },
+  })
+
+  if (!user) {
+    throw new Error('No account found for this roll number.')
+  }
+
+  const isPasswordValid = await verifyPassword({
+    hash: user.password,
+    password: body.password,
+  })
+
+  if (!isPasswordValid) {
+    throw new Error('Incorrect password.')
+  }
+
+  await setSessionCookie({
+    pca: user.passwordChangedAt?.getTime() ?? null,
+    sub: user.id,
+  })
+
+  return { success: true }
+}
+
 export async function requestRegisterOtp(
   input: z.infer<typeof requestOtpSchema>
 ) {
@@ -51,7 +124,7 @@ export async function requestRegisterOtp(
   const email = buildStudentEmail(String(body.rollNumber))
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email }, { rollNumber: body.rollNumber }],
+      OR: [{ email }, { roll: body.rollNumber }],
     },
     select: { id: true },
   })
@@ -79,7 +152,7 @@ export async function verifyRegisterOtpAction(
   const payload = await verifyRegisterOtp(body.tokens, body.otp)
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email: payload.email }, { rollNumber: payload.rollNumber }],
+      OR: [{ email: payload.email }, { roll: payload.rollNumber }],
     },
     select: { id: true },
   })
@@ -105,7 +178,7 @@ export async function registerWithOtp(input: z.infer<typeof registerSchema>) {
 
   const existingUser = await prisma.user.findFirst({
     where: {
-      OR: [{ email: payload.email }, { rollNumber: payload.rollNumber }],
+      OR: [{ email: payload.email }, { roll: payload.rollNumber }],
     },
     select: { id: true },
   })
@@ -114,19 +187,19 @@ export async function registerWithOtp(input: z.infer<typeof registerSchema>) {
     throw new Error('This roll number is already registered.')
   }
 
-  await auth.api.signUpEmail({
-    body: {
-      avatarUrl: '',
+  await prisma.user.create({
+    data: {
+      id: randomUUID(),
       bio: body.bio,
       bloodGroup: body.bloodGroup,
       email: payload.email,
-      facebookUrl: body.facebookUrl,
-      homeTown: body.homeTown,
-      isPublic: true,
+      facebookId: parseFacebookId(body.facebookId),
+      location: body.location,
       name: body.name,
-      password: body.password,
+      password: await hashPassword(body.password),
       phone: body.phone,
-      rollNumber: payload.rollNumber,
+      roll: payload.rollNumber,
+      visibility: 'public',
     },
   })
 
@@ -138,10 +211,11 @@ export async function requestResetPasswordOtp(
 ) {
   const body = requestOtpSchema.parse(input)
   const user = await prisma.user.findUnique({
-    where: { rollNumber: body.rollNumber },
+    where: { roll: body.rollNumber },
     select: {
       id: true,
       email: true,
+      passwordChangedAt: true,
     },
   })
 
@@ -149,22 +223,8 @@ export async function requestResetPasswordOtp(
     throw new Error('No account found for this roll number.')
   }
 
-  const credentialAccount = await prisma.account.findFirst({
-    where: {
-      providerId: 'credential',
-      userId: user.id,
-    },
-    select: {
-      updatedAt: true,
-    },
-  })
-
-  if (!credentialAccount) {
-    throw new Error('Password sign-in is not available for this user.')
-  }
-
   const otp = await createResetPasswordOtp({
-    accountUpdatedAt: credentialAccount.updatedAt.toISOString(),
+    passwordChangedAt: user.passwordChangedAt?.toISOString() ?? null,
     rollNumber: body.rollNumber,
     userId: user.id,
   })
@@ -184,24 +244,25 @@ export async function verifyResetPasswordOtpAction(
 ) {
   const body = verifyOtpSchema.parse(input)
   const payload = await verifyResetPasswordOtp(body.tokens, body.otp)
-  const credentialAccount = await prisma.account.findFirst({
-    where: {
-      providerId: 'credential',
-      userId: payload.userId,
-    },
+  const user = await prisma.user.findUnique({
+    where: { id: payload.userId },
     select: {
-      updatedAt: true,
+      id: true,
+      passwordChangedAt: true,
     },
   })
 
-  if (!credentialAccount) {
-    throw new Error('Password sign-in is not available for this user.')
+  if (!user) {
+    throw new Error('User not found.')
   }
 
-  if (
-    credentialAccount.updatedAt.getTime() >
-    new Date(payload.accountUpdatedAt).getTime()
-  ) {
+  const isExpired =
+    payload.passwordChangedAt === null
+      ? user.passwordChangedAt !== null
+      : user.passwordChangedAt?.getTime() !==
+        new Date(payload.passwordChangedAt).getTime()
+
+  if (isExpired) {
     throw new Error('This code has expired. Request a new one.')
   }
 
@@ -219,40 +280,33 @@ export async function resetPassword(
   const payload = await verifyResetPasswordOtp(body.tokens, body.otp)
   const user = await prisma.user.findUnique({
     where: { id: payload.userId },
-    select: { id: true },
+    select: {
+      id: true,
+      passwordChangedAt: true,
+    },
   })
 
   if (!user) {
     throw new Error('User not found.')
   }
 
-  const credentialAccount = await prisma.account.findFirst({
-    where: {
-      userId: user.id,
-      providerId: 'credential',
-    },
-    select: { id: true, updatedAt: true },
-  })
+  const isExpired =
+    payload.passwordChangedAt === null
+      ? user.passwordChangedAt !== null
+      : user.passwordChangedAt?.getTime() !==
+        new Date(payload.passwordChangedAt).getTime()
 
-  if (!credentialAccount) {
-    throw new Error('Credential account not found.')
-  }
-
-  if (
-    credentialAccount.updatedAt.getTime() >
-    new Date(payload.accountUpdatedAt).getTime()
-  ) {
+  if (isExpired) {
     throw new Error('This code has already been used. Request a new one.')
   }
 
-  await prisma.account.update({
-    where: { id: credentialAccount.id },
+  await prisma.user.update({
+    where: { id: user.id },
     data: {
       password: await hashPassword(body.password),
+      passwordChangedAt: new Date(),
     },
   })
-
-  await prisma.session.deleteMany({ where: { userId: user.id } })
 
   return { rollNumber: payload.rollNumber, success: true }
 }

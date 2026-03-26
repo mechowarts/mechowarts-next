@@ -1,12 +1,4 @@
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button, Loading } from '@/components/ui/button'
-import { Checkbox } from '@/components/ui/checkbox'
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from '@/components/ui/dropdown-menu'
 import {
   Form,
   FormControl,
@@ -24,9 +16,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
-import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { bloodGroups } from '@/constants/profile'
+import { ProfileAvatarPicker } from '@/features/profile/profile-avatar-picker'
 import {
   createProfileState,
   revokeObjectUrl,
@@ -47,15 +39,15 @@ type InstitutionFormValue = {
 }
 
 type ProfileFormValues = {
-  avatarUrl: string
+  avatar: string
   bio: string
   bloodGroup: string
   colleges: InstitutionFormValue[]
   email: string
-  facebookUrl: string
-  homeTown: string
+  facebookId: string
+  location: string
   id: string
-  isPublic: boolean
+  visibility: 'private' | 'public'
   name: string
   phone: string
   rollNumber: number | undefined
@@ -76,19 +68,19 @@ export function UpdateProfilePage() {
   const form = useForm<ProfileFormValues>({
     defaultValues: createProfileState(user),
   })
-  const avatarUrl = form.watch('avatarUrl')
-  const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl ?? '')
+  const avatar = form.watch('avatar')
+  const [avatarPreview, setAvatarPreview] = useState(user.avatar ?? '')
   const avatarObjectUrlRef = useRef<null | string>(null)
   const colleges = useFieldArray({ control: form.control, name: 'colleges' })
   const schools = useFieldArray({ control: form.control, name: 'schools' })
   const updateProfileMutation = useMutation({
     mutationFn: (profile: ProfileFormValues) =>
       updateUserProfile(user.id, {
-        avatarUrl: profile.avatarUrl,
+        avatar: profile.avatar,
         bio: profile.bio,
         bloodGroup: profile.bloodGroup,
-        facebookUrl: profile.facebookUrl,
-        homeTown: profile.homeTown,
+        facebookId: profile.facebookId,
+        location: profile.location,
         institutions: [
           ...profile.colleges.map((institution) => ({
             kind: 'college' as const,
@@ -101,7 +93,7 @@ export function UpdateProfilePage() {
             location: institution.location || undefined,
           })),
         ],
-        isPublic: profile.isPublic,
+        visibility: profile.visibility,
         name: profile.name,
         phone: profile.phone,
       }),
@@ -146,131 +138,74 @@ export function UpdateProfilePage() {
                   return
                 }
 
-                updateProfileMutation.mutate(
-                  {
-                    ...profile,
-                    avatarUrl: profile.avatarUrl,
+                updateProfileMutation.mutate(profile, {
+                  onSuccess() {
+                    toast.success('Profile updated successfully!')
+                    router.push(`/profile/${user.rollNumber}`)
                   },
-                  {
-                    onSuccess() {
-                      toast.success('Profile updated successfully!')
-                      router.push(`/profile/${user.rollNumber}`)
-                    },
-                    onError(error) {
-                      toast.error(
-                        error instanceof Error
-                          ? error.message
-                          : 'Failed to update profile. Please try again.'
-                      )
-                    },
-                  }
-                )
+                  onError(error) {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : 'Failed to update profile. Please try again.'
+                    )
+                  },
+                })
               })}
               className="border-border bg-card rounded-xl border p-8"
             >
-              <div className="mb-8 flex flex-col items-center">
-                <div className="relative">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <button
-                        type="button"
-                        className="border-input ring-offset-background focus-visible:ring-ring relative h-28 w-28 rounded-full border-2 p-0 focus-visible:ring-2 focus-visible:ring-offset-2"
-                        aria-label="Profile image options"
-                        disabled={isSubmitting}
-                      >
-                        <Avatar className="h-28 w-28">
-                          <AvatarImage
-                            src={
-                              avatarPreview ||
-                              avatarUrl ||
-                              '/assets/icons/profile-placeholder.svg'
-                            }
-                            alt="profile"
-                            className="object-cover"
-                          />
-                          <AvatarFallback className="bg-muted text-muted-foreground text-xl font-semibold">
-                            {user.name
-                              .split(' ')
-                              .filter(Boolean)
-                              .slice(0, 2)
-                              .map((part: string) => part[0]?.toUpperCase())
-                              .join('') || 'U'}
-                          </AvatarFallback>
-                        </Avatar>
-                      </button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="center" className="w-44">
-                      <DropdownMenuItem
-                        disabled={isSubmitting}
-                        onSelect={async () => {
-                          try {
-                            const fileList = await openFileExplorer({
-                              accept: 'image/*',
-                            })
-                            const file = fileList[0]
+              <ProfileAvatarPicker
+                avatar={avatar}
+                avatarPreview={avatarPreview}
+                userName={user.name}
+                disabled={isSubmitting}
+                isUploading={uploadAvatarMutation.isPending}
+                onChangeImage={async () => {
+                  try {
+                    const fileList = await openFileExplorer({
+                      accept: 'image/*',
+                    })
+                    const file = fileList[0]
 
-                            if (!file) {
-                              return
-                            }
+                    if (!file) {
+                      return
+                    }
 
-                            const previousAvatarUrl =
-                              form.getValues('avatarUrl')
-                            const objectUrl = URL.createObjectURL(file)
+                    const previousAvatar = form.getValues('avatar')
+                    const objectUrl = URL.createObjectURL(file)
 
-                            revokeObjectUrl(avatarObjectUrlRef.current)
-                            avatarObjectUrlRef.current = objectUrl
-                            setAvatarPreview(objectUrl)
+                    revokeObjectUrl(avatarObjectUrlRef.current)
+                    avatarObjectUrlRef.current = objectUrl
+                    setAvatarPreview(objectUrl)
 
-                            uploadAvatarMutation.mutate(file, {
-                              onSuccess(updatedUser) {
-                                revokeObjectUrl(avatarObjectUrlRef.current)
-                                avatarObjectUrlRef.current = null
-                                setAvatarPreview(updatedUser.avatarUrl)
-                                form.setValue(
-                                  'avatarUrl',
-                                  updatedUser.avatarUrl
-                                )
-                                toast.success('Avatar updated successfully!')
-                              },
-                              onError(error) {
-                                revokeObjectUrl(avatarObjectUrlRef.current)
-                                avatarObjectUrlRef.current = null
-                                setAvatarPreview(previousAvatarUrl)
-                                toast.error(
-                                  error instanceof Error
-                                    ? error.message
-                                    : 'Failed to upload avatar. Please try again.'
-                                )
-                              },
-                            })
-                          } catch {}
-                        }}
-                      >
-                        Change Image
-                      </DropdownMenuItem>
-                      <DropdownMenuItem
-                        disabled={isSubmitting}
-                        onSelect={() => {
-                          revokeObjectUrl(avatarObjectUrlRef.current)
-                          avatarObjectUrlRef.current = null
-                          setAvatarPreview('')
-                          form.setValue('avatarUrl', '')
-                        }}
-                      >
-                        Remove Image
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                  {uploadAvatarMutation.isPending ? (
-                    <div className="bg-background/80 absolute inset-0 flex items-center justify-center rounded-full">
-                      <Spinner size="sm" />
-                    </div>
-                  ) : null}
-                </div>
-                <p className="text-muted-foreground mt-3 text-sm">
-                  Click avatar for image options
-                </p>
-              </div>
+                    uploadAvatarMutation.mutate(file, {
+                      onSuccess(updatedUser) {
+                        revokeObjectUrl(avatarObjectUrlRef.current)
+                        avatarObjectUrlRef.current = null
+                        setAvatarPreview(updatedUser.avatar)
+                        form.setValue('avatar', updatedUser.avatar)
+                        toast.success('Avatar updated successfully!')
+                      },
+                      onError(error) {
+                        revokeObjectUrl(avatarObjectUrlRef.current)
+                        avatarObjectUrlRef.current = null
+                        setAvatarPreview(previousAvatar)
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : 'Failed to upload avatar. Please try again.'
+                        )
+                      },
+                    })
+                  } catch {}
+                }}
+                onRemoveImage={() => {
+                  revokeObjectUrl(avatarObjectUrlRef.current)
+                  avatarObjectUrlRef.current = null
+                  setAvatarPreview('')
+                  form.setValue('avatar', '')
+                }}
+              />
 
               <div className="mb-6 space-y-6">
                 <FormField
@@ -368,16 +303,16 @@ export function UpdateProfilePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="homeTown"
+                  name="location"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Home Town</FormLabel>
+                      <FormLabel>Location</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
                           type="text"
                           value={field.value || ''}
-                          placeholder="Your home town"
+                          placeholder="Your location"
                           disabled={isSubmitting}
                         />
                       </FormControl>
@@ -500,16 +435,16 @@ export function UpdateProfilePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="facebookUrl"
+                  name="facebookId"
                   render={({ field }) => (
                     <FormItem>
-                      <FormLabel>Facebook URL</FormLabel>
+                      <FormLabel>Facebook</FormLabel>
                       <FormControl>
                         <Input
                           {...field}
-                          type="url"
+                          type="text"
                           value={field.value || ''}
-                          placeholder="https://facebook.com/yourprofile"
+                          placeholder="facebook username"
                           disabled={isSubmitting}
                         />
                       </FormControl>
@@ -519,22 +454,28 @@ export function UpdateProfilePage() {
                 />
                 <FormField
                   control={form.control}
-                  name="isPublic"
+                  name="visibility"
                   render={({ field }) => (
-                    <FormItem className="flex items-center gap-3 space-y-0">
+                    <FormItem>
+                      <FormLabel>Profile visibility</FormLabel>
                       <FormControl>
-                        <Checkbox
-                          id="is-public"
-                          checked={field.value === true}
-                          onCheckedChange={(checked) =>
-                            field.onChange(checked === true)
-                          }
+                        <Select
+                          value={field.value}
+                          onValueChange={field.onChange}
                           disabled={isSubmitting}
-                        />
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder="Select visibility" />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="public">Public</SelectItem>
+                            <SelectItem value="private">Private</SelectItem>
+                          </SelectContent>
+                        </Select>
                       </FormControl>
-                      <FormLabel htmlFor="is-public" className="cursor-pointer">
-                        Make profile public (visible to all users)
-                      </FormLabel>
+                      <p className="text-muted-foreground text-sm">
+                        Public profiles are visible to everyone.
+                      </p>
                       <FormMessage />
                     </FormItem>
                   )}

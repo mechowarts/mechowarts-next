@@ -48,14 +48,14 @@ export function createProfileState(
     name: user.name,
     email: user.email,
     bio: user.bio ?? '',
-    isPublic: user.isPublic ?? true,
+    visibility: user.visibility ?? 'public',
     bloodGroup: user.bloodGroup ?? '',
-    homeTown: user.homeTown ?? '',
+    location: user.location ?? '',
     colleges: readInstitutions(getUserInstitutions(user), 'college'),
     schools: readInstitutions(getUserInstitutions(user), 'school'),
-    avatarUrl: user.avatarUrl ?? '',
+    avatar: user.avatar ?? '',
     phone: user.phone ?? '',
-    facebookUrl: user.facebookUrl ?? '',
+    facebookId: user.facebookId ?? '',
     rollNumber: user.rollNumber ?? undefined,
   }
 }

@@ -10,8 +10,8 @@ import { useState } from 'react'
 export function HomePage() {
   const { user } = useAuth()
   const avatarUrl =
-    user && 'avatarUrl' in user && typeof user.avatarUrl === 'string'
-      ? user.avatarUrl
+    user && 'avatar' in user && typeof user.avatar === 'string'
+      ? user.avatar
       : '/assets/icons/profile-placeholder.svg'
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const postsQuery = useQuery({

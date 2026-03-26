@@ -1,7 +1,7 @@
-import { signInAccount } from '@/api/http/auth'
 import { Spinner } from '@/components/ui/spinner'
 import { AuthUserPreview } from '@/features/auth/auth-user-preview'
 import { LoginForm } from '@/features/auth/login-form'
+import { signInAction } from '@/server/actions/auth.actions'
 import { getUserByRoll } from '@/server/actions/users.actions'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
@@ -13,7 +13,7 @@ export function LoginPage() {
   const params = useParams<{ roll: string }>()
   const roll = typeof params.roll === 'string' ? params.roll : ''
   const signInMutation = useMutation({
-    mutationFn: signInAccount,
+    mutationFn: signInAction,
   })
   const userQuery = useQuery({
     queryKey: ['auth-user', roll],
@@ -38,7 +38,7 @@ export function LoginPage() {
   return (
     <>
       <AuthUserPreview
-        avatarUrl={userQuery.data.avatarUrl ?? undefined}
+        avatarUrl={userQuery.data.avatar ?? undefined}
         name={userQuery.data.name}
       />
 

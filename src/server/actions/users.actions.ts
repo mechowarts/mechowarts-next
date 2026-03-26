@@ -14,31 +14,31 @@ const institutionSchema = z.object({
 
 const updateUserSchema = z.object({
   name: z.string().min(1),
-  avatarUrl: z.string(),
+  avatar: z.string(),
   bio: z.string(),
   bloodGroup: z.string().optional(),
-  homeTown: z.string().optional(),
+  location: z.string().optional(),
   phone: z.string().optional(),
-  facebookUrl: z.string().optional(),
-  isPublic: z.boolean(),
+  facebookId: z.string().optional(),
+  visibility: z.enum(['public', 'private']),
   institutions: z.array(institutionSchema),
 })
 
 export async function listUsers() {
-  return prisma.user.findMany({
+  const users = await prisma.user.findMany({
     orderBy: { name: 'asc' },
     select: {
       id: true,
       name: true,
       email: true,
-      rollNumber: true,
-      avatarUrl: true,
+      roll: true,
+      avatar: true,
       bio: true,
       bloodGroup: true,
-      homeTown: true,
+      location: true,
       phone: true,
-      facebookUrl: true,
-      isPublic: true,
+      facebookId: true,
+      visibility: true,
       institutions: {
         select: {
           id: true,
@@ -49,6 +49,11 @@ export async function listUsers() {
       },
     },
   })
+
+  return users.map((user) => ({
+    ...user,
+    rollNumber: user.roll,
+  }))
 }
 
 export async function getUserByRoll(roll: string) {
@@ -58,20 +63,20 @@ export async function getUserByRoll(roll: string) {
     throw new Error('Invalid roll number.')
   }
 
-  return prisma.user.findUnique({
-    where: { rollNumber },
+  const user = await prisma.user.findUnique({
+    where: { roll: rollNumber },
     select: {
       id: true,
       name: true,
       email: true,
-      rollNumber: true,
-      avatarUrl: true,
+      roll: true,
+      avatar: true,
       bio: true,
       bloodGroup: true,
-      homeTown: true,
+      location: true,
       phone: true,
-      facebookUrl: true,
-      isPublic: true,
+      facebookId: true,
+      visibility: true,
       institutions: {
         select: {
           id: true,
@@ -82,6 +87,15 @@ export async function getUserByRoll(roll: string) {
       },
     },
   })
+
+  if (!user) {
+    return null
+  }
+
+  return {
+    ...user,
+    rollNumber: user.roll,
+  }
 }
 
 export async function updateUserProfile(
@@ -100,13 +114,13 @@ export async function updateUserProfile(
     where: { id: userId },
     data: {
       name: body.name,
-      avatarUrl: body.avatarUrl,
+      avatar: body.avatar,
       bio: body.bio,
       bloodGroup: body.bloodGroup,
-      homeTown: body.homeTown,
+      location: body.location,
       phone: body.phone,
-      facebookUrl: body.facebookUrl,
-      isPublic: body.isPublic,
+      facebookId: body.facebookId,
+      visibility: body.visibility,
     },
   })
 
@@ -131,14 +145,14 @@ export async function updateUserProfile(
       id: true,
       name: true,
       email: true,
-      rollNumber: true,
-      avatarUrl: true,
+      roll: true,
+      avatar: true,
       bio: true,
       bloodGroup: true,
-      homeTown: true,
+      location: true,
       phone: true,
-      facebookUrl: true,
-      isPublic: true,
+      facebookId: true,
+      visibility: true,
       institutions: {
         select: {
           id: true,
@@ -154,5 +168,8 @@ export async function updateUserProfile(
     throw new Error('User not found.')
   }
 
-  return user
+  return {
+    ...user,
+    rollNumber: user.roll,
+  }
 }

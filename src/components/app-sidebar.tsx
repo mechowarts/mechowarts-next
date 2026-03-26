@@ -1,11 +1,11 @@
 'use client'
 
-import { signOutAccount } from '@/api/http/auth'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { sidebarLinks } from '@/constants/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { signOutAction } from '@/server/actions/auth.actions'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation } from '@tanstack/react-query'
@@ -19,7 +19,7 @@ export function AppSidebar() {
   const { user, state } = useAuth()
   const isAuthenticated = state === 'authenticated'
   const signOutMutation = useMutation({
-    mutationFn: signOutAccount,
+    mutationFn: signOutAction,
   })
 
   return (
@@ -38,7 +38,7 @@ export function AppSidebar() {
             className="flex items-center gap-3"
           >
             <img
-              src={user.avatarUrl ?? '/assets/icons/profile-placeholder.svg'}
+              src={user.avatar ?? '/assets/icons/profile-placeholder.svg'}
               alt="profile"
               className="h-14 w-14 rounded-full object-cover"
             />

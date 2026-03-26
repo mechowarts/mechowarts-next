@@ -1,6 +1,5 @@
 'use client'
 
-import { signOutAccount } from '@/api/http/auth'
 import { AppSidebar } from '@/components/app-sidebar'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
@@ -8,6 +7,7 @@ import { Spinner } from '@/components/ui/spinner'
 import { bottomBarLinks } from '@/constants/navigation'
 import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { signOutAction } from '@/server/actions/auth.actions'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation } from '@tanstack/react-query'
@@ -22,7 +22,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
   const isLoading = state === 'loading'
   const isAuthenticated = state === 'authenticated'
   const signOutMutation = useMutation({
-    mutationFn: signOutAccount,
+    mutationFn: signOutAction,
   })
 
   if (isLoading) {
@@ -67,9 +67,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
                   className="flex items-center gap-3"
                 >
                   <img
-                    src={
-                      user.avatarUrl ?? '/assets/icons/profile-placeholder.svg'
-                    }
+                    src={user.avatar ?? '/assets/icons/profile-placeholder.svg'}
                     alt="profile"
                     className="h-8 w-8 rounded-full object-cover"
                   />

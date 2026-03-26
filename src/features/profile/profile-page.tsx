@@ -18,6 +18,20 @@ import {
   FaWhatsapp,
 } from 'react-icons/fa6'
 
+function getFacebookUrl(facebookId: string) {
+  const trimmed = facebookId.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+
+  return `https://facebook.com/${trimmed}`
+}
+
 export function ProfilePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
@@ -57,7 +71,7 @@ export function ProfilePage() {
     )
   }
 
-  if (profileQuery.data.isPublic === false && !isOwnProfile) {
+  if (profileQuery.data.visibility === 'private' && !isOwnProfile) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="border-border bg-card max-w-md rounded-xl border p-8 text-center">
@@ -94,7 +108,7 @@ export function ProfilePage() {
 
           <img
             src={
-              profileQuery.data.avatarUrl ||
+              profileQuery.data.avatar ||
               '/assets/icons/profile-placeholder.svg'
             }
             alt={profileQuery.data.name}
@@ -103,7 +117,7 @@ export function ProfilePage() {
 
           <h1 className="text-foreground mt-2 flex items-center justify-center gap-2 text-3xl font-bold">
             {profileQuery.data.name}
-            {profileQuery.data.isPublic ? (
+            {profileQuery.data.visibility === 'public' ? (
               <span title="Public">Public</span>
             ) : (
               <span title="Private">Private</span>
@@ -133,9 +147,9 @@ export function ProfilePage() {
               </a>
             ) : null}
 
-            {profileQuery.data.facebookUrl ? (
+            {profileQuery.data.facebookId ? (
               <a
-                href={profileQuery.data.facebookUrl}
+                href={getFacebookUrl(profileQuery.data.facebookId)}
                 target="_blank"
                 rel="noreferrer"
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/90 flex min-w-36 items-center justify-center gap-2 rounded-lg px-5 py-3 text-lg font-semibold transition"
@@ -171,13 +185,13 @@ export function ProfilePage() {
                     </div>
                   ) : null}
 
-                  {profileQuery.data.homeTown ? (
+                  {profileQuery.data.location ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaHouse className="text-primary mr-1 inline-block" />{' '}
                         Home Town:
                       </span>{' '}
-                      {profileQuery.data.homeTown}
+                      {profileQuery.data.location}
                     </div>
                   ) : null}
 

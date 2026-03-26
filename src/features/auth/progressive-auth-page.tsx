@@ -1,11 +1,10 @@
-import { signInAccount } from '@/api/http/auth'
 import { Button } from '@/components/ui/button'
 import { AuthStepper } from '@/features/auth/auth-stepper'
 import { AuthUserPreview } from '@/features/auth/auth-user-preview'
 import { LoginForm } from '@/features/auth/login-form'
 import { ProgressiveRegisterStep } from '@/features/auth/progressive-register-step'
 import { RollInput } from '@/features/auth/roll-input'
-import { registerWithOtp } from '@/server/actions/auth.actions'
+import { registerWithOtp, signInAction } from '@/server/actions/auth.actions'
 import { getUserByRoll } from '@/server/actions/users.actions'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
@@ -42,7 +41,7 @@ export function ProgressiveAuthPage() {
   const [previewAvatarUrl, setPreviewAvatarUrl] = useState('')
 
   const signInMutation = useMutation({
-    mutationFn: signInAccount,
+    mutationFn: signInAction,
   })
   const registerMutation = useMutation({
     mutationFn: registerWithOtp,
@@ -59,7 +58,7 @@ export function ProgressiveAuthPage() {
 
         if (user) {
           setPreviewName(user.name)
-          setPreviewAvatarUrl(user.avatarUrl ?? '')
+          setPreviewAvatarUrl(user.avatar ?? '')
           setStep('login')
           setStepHistory(['roll', 'login'])
           return
@@ -121,7 +120,7 @@ export function ProgressiveAuthPage() {
 
                 if (user) {
                   setPreviewName(user.name)
-                  setPreviewAvatarUrl(user.avatarUrl ?? '')
+                  setPreviewAvatarUrl(user.avatar ?? '')
                   setStep('login')
                   setStepHistory(['roll', 'login'])
                   return
@@ -181,9 +180,9 @@ export function ProgressiveAuthPage() {
           onRegisterSubmit={({
             bio,
             bloodGroup,
-            facebookUrl,
+            facebookId,
             firstName,
-            homeTown,
+            location,
             lastName,
             password,
             phone,
@@ -196,8 +195,8 @@ export function ProgressiveAuthPage() {
               {
                 bio,
                 bloodGroup,
-                facebookUrl: facebookUrl || undefined,
-                homeTown,
+                facebookId: facebookId || undefined,
+                location,
                 name,
                 otp,
                 password,
@@ -210,7 +209,7 @@ export function ProgressiveAuthPage() {
                   toast.success('Account created. Signing you in...')
 
                   try {
-                    await signInAccount({
+                    await signInAction({
                       password,
                       rollNumber: Number.parseInt(roll, 10),
                     })

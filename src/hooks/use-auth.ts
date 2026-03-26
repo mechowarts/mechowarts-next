@@ -1,8 +1,8 @@
-import { authClient } from '@/lib/auth-client'
-import type { auth } from '@/server/lib/auth'
-import type { Prettify } from 'daily-code'
+import { getSessionAction } from '@/server/actions/auth.actions'
+import { useQuery } from '@tanstack/react-query'
 
-export type AuthSessionUser = Prettify<typeof auth.$Infer.Session.user>
+type AuthSession = Awaited<ReturnType<typeof getSessionAction>>
+export type AuthSessionUser = NonNullable<AuthSession>['user']
 
 type UnauthenticatedState = {
   state: 'loading' | 'unauthenticated'
@@ -17,17 +17,23 @@ type AuthenticatedState = {
 }
 
 export function useAuth() {
-  const result = authClient.useSession()
+  const result = useQuery({
+    queryFn: getSessionAction,
+    queryKey: ['auth-session'],
+    retry: false,
+  })
 
   return {
-    user: result.data?.user,
+    user: result.data?.user ?? null,
 
     state: result.isPending
       ? 'loading'
-      : result.data
+      : result.data?.user
         ? 'authenticated'
         : 'unauthenticated',
 
-    refetch: result.refetch,
+    refetch: async () => {
+      await result.refetch()
+    },
   } as UnauthenticatedState | AuthenticatedState
 }

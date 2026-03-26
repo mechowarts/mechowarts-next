@@ -18,6 +18,20 @@ import { FaDroplet, FaFacebook, FaHouse, FaWhatsapp } from 'react-icons/fa6'
 
 const usersPerPage = 9
 
+function getFacebookUrl(facebookId: string) {
+  const trimmed = facebookId.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+
+  return `https://facebook.com/${trimmed}`
+}
+
 export function AllUsersPage() {
   const router = useRouter()
   const { user } = useAuth()
@@ -37,7 +51,8 @@ export function AllUsersPage() {
   const users = useMemo(() => {
     return (allUsersQuery.data ?? []).filter(
       (user) =>
-        user.isPublic !== false || user.rollNumber === currentUserRollNumber
+        user.visibility !== 'private' ||
+        user.rollNumber === currentUserRollNumber
     )
   }, [allUsersQuery.data, currentUserRollNumber])
 
@@ -174,7 +189,7 @@ export function AllUsersPage() {
                         <>
                           <img
                             src={
-                              user.avatarUrl ||
+                              user.avatar ||
                               '/assets/icons/profile-placeholder.svg'
                             }
                             alt={user.name}
@@ -203,10 +218,10 @@ export function AllUsersPage() {
                               </span>
                             ) : null}
 
-                            {user.homeTown ? (
+                            {user.location ? (
                               <span className="flex items-center gap-1">
                                 <FaHouse className="text-primary mr-1 inline-block" />
-                                {user.homeTown}
+                                {user.location}
                               </span>
                             ) : null}
                           </div>
@@ -225,9 +240,9 @@ export function AllUsersPage() {
                               </a>
                             ) : null}
 
-                            {user.facebookUrl ? (
+                            {user.facebookId ? (
                               <a
-                                href={user.facebookUrl}
+                                href={getFacebookUrl(user.facebookId)}
                                 target="_blank"
                                 rel="noreferrer"
                                 title="Facebook"
