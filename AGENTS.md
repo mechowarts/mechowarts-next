@@ -9,7 +9,7 @@
 
 ## Tailwind Theme
 
-- Default color shades (eg: `text-slate-500`, `bg-red-500`, `bg-white`) are not available. Use theme colors (eg: `text-muted`) instead.
+- Default color shades (eg: `text-slate-500`, `border-red-500`, `bg-white`) are not available. Use theme colors (eg: `text-muted`, `border-border`, `bg-primary`) instead.
 
 ## React
 
