@@ -12,9 +12,7 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email           String    @unique
-  emailVerifiedAt DateTime?
-
+  email             String    @unique
   password          String
   passwordChangedAt DateTime?
 
