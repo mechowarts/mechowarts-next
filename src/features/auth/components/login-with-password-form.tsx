@@ -23,7 +23,7 @@ import { toast } from 'sonner'
 import { z } from 'zod'
 
 const passwordSchema = z.object({
-  password: z.string().min(8, 'Password must be at least 8 characters long.'),
+  password: z.string().min(6, 'Password must be at least 6 characters long.'),
 })
 
 function getInitials(name?: string | null) {
@@ -82,12 +82,12 @@ export function LoginWithPasswordForm({
 
   return (
     <div className="mx-auto w-full max-w-sm">
-      <div className="rounded-2xl border border-slate-200 bg-white p-8">
+      <div className="bg-card rounded-2xl border p-8">
         <div className="mb-8 text-center">
-          <h1 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900">
+          <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
             Enter your password
           </h1>
-          <p className="text-sm text-slate-500">
+          <p className="text-muted-foreground text-sm">
             We found your account. Enter your password to continue.
           </p>
         </div>
@@ -100,21 +100,21 @@ export function LoginWithPasswordForm({
 
         {!userQuery.isLoading && userQuery.data ? (
           <div className="space-y-6">
-            <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
-              <Avatar className="size-12 border border-slate-200 bg-white">
+            <div className="bg-muted flex items-center gap-4 rounded-xl border p-4">
+              <Avatar className="bg-background size-12 border">
                 <AvatarImage
                   src={userQuery.data.avatar ?? undefined}
                   alt={userQuery.data.name}
                 />
-                <AvatarFallback className="bg-slate-100 text-sm font-semibold text-slate-700">
+                <AvatarFallback className="text-foreground bg-secondary text-sm font-semibold">
                   {getInitials(userQuery.data.name)}
                 </AvatarFallback>
               </Avatar>
               <div className="flex-1">
-                <p className="font-semibold text-slate-900">
+                <p className="text-foreground font-semibold">
                   {userQuery.data.name}
                 </p>
-                <p className="text-sm text-slate-500">Roll {roll}</p>
+                <p className="text-muted-foreground text-sm">Roll {roll}</p>
               </div>
             </div>
 
@@ -178,7 +178,7 @@ export function LoginWithPasswordForm({
                     asChild
                     type="button"
                     variant="link"
-                    className="h-auto px-0 text-sm text-slate-500"
+                    className="text-muted-foreground h-auto px-0 text-sm"
                   >
                     <Link href={`/forgot-password?roll=${roll}`}>
                       Forgot password?
@@ -188,7 +188,7 @@ export function LoginWithPasswordForm({
                   <Button
                     type="button"
                     variant="ghost"
-                    className="h-auto px-0 text-sm text-slate-500"
+                    className="text-muted-foreground h-auto px-0 text-sm"
                     onClick={backToStart}
                   >
                     <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
