@@ -7,12 +7,12 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
+import { RollNumberInput } from './roll-number-input'
 
 const rollSchema = z.object({
   roll: z
@@ -52,19 +52,9 @@ export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
                 <FormItem>
                   <FormLabel>Roll Number</FormLabel>
                   <FormControl>
-                    <Input
-                      {...field}
-                      inputMode="numeric"
-                      placeholder="2108061"
-                      onChange={(event) =>
-                        field.onChange(
-                          event.target.value.replace(/\D/g, '').slice(0, 7)
-                        )
-                      }
-                      className="h-12 border-slate-200 bg-slate-50 text-center text-lg font-semibold text-slate-900 transition-all hover:border-slate-300 focus:border-indigo-500 focus:bg-white focus:ring-2 focus:ring-indigo-500/10"
-                    />
+                    <RollNumberInput {...field} />
                   </FormControl>
-                  <FormMessage className="text-center text-xs" />
+                  <FormMessage />
                 </FormItem>
               )}
             />
