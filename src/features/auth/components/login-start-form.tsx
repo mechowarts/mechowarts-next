@@ -49,7 +49,7 @@ export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
               control={form.control}
               name="roll"
               render={({ field }) => (
-                <FormItem className="space-y-3">
+                <FormItem>
                   <FormLabel>Roll Number</FormLabel>
                   <FormControl>
                     <Input
