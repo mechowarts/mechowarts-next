@@ -3,7 +3,6 @@
 import { AppSidebar } from '@/components/app-sidebar'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
-import { Spinner } from '@/components/ui/spinner'
 import { sidebarLinks } from '@/constants/navigation'
 import { cn } from '@/lib/utils'
 import { signOutAction } from '@/server/actions/auth.actions'
@@ -18,21 +17,11 @@ import { PropsWithChildren } from 'react'
 export default function MainLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const pathname = usePathname()
-
   const user = useAuthStore((store) => store.user)
-  const status = useAuthStore((store) => store.status)
 
   const signOutMutation = useMutation({
     mutationFn: signOutAction,
   })
-
-  if (status === 'loading') {
-    return (
-      <div className="flex h-screen w-full items-center justify-center">
-        <Spinner className="size-8" />
-      </div>
-    )
-  }
 
   return (
     <div className="w-full md:flex">
