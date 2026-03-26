@@ -2,8 +2,8 @@
 
 import 'server-only'
 
-import { prisma } from '@/server/lib/prisma'
 import { requireSession } from '@/server/helpers/session'
+import { prisma } from '@/server/lib/prisma'
 import { z } from 'zod'
 
 const postInputSchema = z.object({

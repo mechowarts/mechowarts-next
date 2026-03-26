@@ -2,10 +2,6 @@
 
 import 'server-only'
 
-import { auth } from '@/server/lib/auth'
-import { sendOtpEmail } from '@/server/lib/mailer'
-import { hashPassword } from '@/server/lib/password'
-import { prisma } from '@/server/lib/prisma'
 import {
   authOtpTokenLimit,
   createRegisterOtp,
@@ -13,6 +9,10 @@ import {
   verifyRegisterOtp,
   verifyResetPasswordOtp,
 } from '@/server/helpers/auth-otp'
+import { auth } from '@/server/lib/auth'
+import { sendOtpEmail } from '@/server/lib/mailer'
+import { hashPassword } from '@/server/lib/password'
+import { prisma } from '@/server/lib/prisma'
 import { buildStudentEmail } from '@/utils/roll'
 import { z } from 'zod'
 

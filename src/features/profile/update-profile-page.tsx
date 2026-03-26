@@ -38,97 +38,39 @@ import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { openFileExplorer } from 'daily-code/browser'
 import { useRouter } from 'next/navigation'
 import { useEffect, useRef, useState } from 'react'
-import type { Control, FieldArrayWithId } from 'react-hook-form'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 
-type ProfileFormValues = ReturnType<typeof createProfileState>
+type InstitutionFormValue = {
+  location: string
+  name: string
+}
 
-function InstitutionFieldArray({
-  addLabel,
-  control,
-  disabled,
-  fields,
-  label,
-  name,
-  onAppend,
-  onRemove,
-  placeholder,
-}: {
-  addLabel: string
-  control: Control<ProfileFormValues>
-  disabled: boolean
-  fields: FieldArrayWithId<ProfileFormValues, 'colleges' | 'schools', 'id'>[]
-  label: string
-  name: 'colleges' | 'schools'
-  onAppend: () => void
-  onRemove: (index: number) => void
-  placeholder: string
-}) {
-  return (
-    <div>
-      <Label className="mb-2 block">{label}</Label>
-      <div className="space-y-2">
-        {fields.map((fieldItem, index) => (
-          <div key={fieldItem.id} className="flex items-center gap-2">
-            <FormField
-              control={control}
-              name={`${name}.${index}.name`}
-              render={({ field }) => (
-                <FormItem className="flex-1">
-                  <FormControl>
-                    <Input
-                      {...field}
-                      type="text"
-                      value={field.value || ''}
-                      placeholder={placeholder}
-                      disabled={disabled}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-            <Button
-              type="button"
-              variant="outline"
-              onClick={() => onRemove(index)}
-              disabled={disabled}
-            >
-              -
-            </Button>
-          </div>
-        ))}
-        <Button
-          type="button"
-          variant="outline"
-          onClick={onAppend}
-          disabled={disabled}
-        >
-          {addLabel}
-        </Button>
-      </div>
-    </div>
-  )
+type ProfileFormValues = {
+  avatarUrl: string
+  bio: string
+  bloodGroup: string
+  colleges: InstitutionFormValue[]
+  email: string
+  facebookUrl: string
+  homeTown: string
+  id: string
+  isPublic: boolean
+  name: string
+  phone: string
+  rollNumber: number | undefined
+  schools: InstitutionFormValue[]
 }
 
 export function UpdateProfilePage() {
   const { refetch, user } = useAuth()
 
   if (!user) {
-    return null
+    throw new Error(
+      'User must be authenticated to access the update profile page.'
+    )
   }
 
-  return <UpdateProfileForm key={user.id} user={user} refetchAuth={refetch} />
-}
-
-function UpdateProfileForm({
-  refetchAuth,
-  user,
-}: {
-  refetchAuth: () => Promise<void>
-  user: NonNullable<ReturnType<typeof useAuth>['user']>
-}) {
   const router = useRouter()
   const queryClient = useQueryClient()
   const form = useForm<ProfileFormValues>({
@@ -168,7 +110,7 @@ function UpdateProfileForm({
       await queryClient.invalidateQueries({
         queryKey: ['profile', String(profile.rollNumber)],
       })
-      await refetchAuth()
+      await refetch()
     },
   })
   const uploadAvatarMutation = useMutation({
@@ -251,7 +193,7 @@ function UpdateProfileForm({
                               .split(' ')
                               .filter(Boolean)
                               .slice(0, 2)
-                              .map((part) => part[0]?.toUpperCase())
+                              .map((part: string) => part[0]?.toUpperCase())
                               .join('') || 'U'}
                           </AvatarFallback>
                         </Avatar>
@@ -443,28 +385,100 @@ function UpdateProfileForm({
                     </FormItem>
                   )}
                 />
-                <InstitutionFieldArray
-                  addLabel="Add College"
-                  control={form.control}
-                  disabled={isSubmitting}
-                  fields={colleges.fields}
-                  label="Colleges"
-                  name="colleges"
-                  onAppend={() => colleges.append({ location: '', name: '' })}
-                  onRemove={(index) => colleges.remove(index)}
-                  placeholder="College name"
-                />
-                <InstitutionFieldArray
-                  addLabel="Add School"
-                  control={form.control}
-                  disabled={isSubmitting}
-                  fields={schools.fields}
-                  label="Schools"
-                  name="schools"
-                  onAppend={() => schools.append({ location: '', name: '' })}
-                  onRemove={(index) => schools.remove(index)}
-                  placeholder="School name"
-                />
+                <div>
+                  <Label className="mb-2 block">Colleges</Label>
+                  <div className="space-y-2">
+                    {colleges.fields.map((fieldItem, index) => (
+                      <div
+                        key={fieldItem.id}
+                        className="flex items-center gap-2"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`colleges.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  value={field.value || ''}
+                                  placeholder="College name"
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => colleges.remove(index)}
+                          disabled={isSubmitting}
+                        >
+                          -
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() =>
+                        colleges.append({ location: '', name: '' })
+                      }
+                      disabled={isSubmitting}
+                    >
+                      Add College
+                    </Button>
+                  </div>
+                </div>
+                <div>
+                  <Label className="mb-2 block">Schools</Label>
+                  <div className="space-y-2">
+                    {schools.fields.map((fieldItem, index) => (
+                      <div
+                        key={fieldItem.id}
+                        className="flex items-center gap-2"
+                      >
+                        <FormField
+                          control={form.control}
+                          name={`schools.${index}.name`}
+                          render={({ field }) => (
+                            <FormItem className="flex-1">
+                              <FormControl>
+                                <Input
+                                  {...field}
+                                  type="text"
+                                  value={field.value || ''}
+                                  placeholder="School name"
+                                  disabled={isSubmitting}
+                                />
+                              </FormControl>
+                              <FormMessage />
+                            </FormItem>
+                          )}
+                        />
+                        <Button
+                          type="button"
+                          variant="outline"
+                          onClick={() => schools.remove(index)}
+                          disabled={isSubmitting}
+                        >
+                          -
+                        </Button>
+                      </div>
+                    ))}
+                    <Button
+                      type="button"
+                      variant="outline"
+                      onClick={() => schools.append({ location: '', name: '' })}
+                      disabled={isSubmitting}
+                    >
+                      Add School
+                    </Button>
+                  </div>
+                </div>
                 <FormField
                   control={form.control}
                   name="phone"

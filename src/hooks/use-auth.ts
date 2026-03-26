@@ -1,5 +1,5 @@
-import type { auth } from '@/server/lib/auth'
 import { authClient } from '@/lib/auth-client'
+import type { auth } from '@/server/lib/auth'
 import type { Prettify } from 'daily-code'
 
 type SessionData = Prettify<typeof auth.$Infer.Session>
