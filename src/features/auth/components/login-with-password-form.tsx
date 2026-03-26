@@ -14,7 +14,7 @@ import { signInAction } from '@/server/actions/auth.actions'
 import { getUserByRoll } from '@/server/actions/users.actions'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { ArrowLeft, KeyRound, ShieldCheck } from 'lucide-react'
+import { ArrowLeft, KeyRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -82,10 +82,6 @@ export function LoginWithPasswordForm({
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-slate-200 bg-slate-50 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-slate-700 uppercase">
-          <ShieldCheck className="size-3.5" />
-          Login
-        </div>
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
             Enter your password
