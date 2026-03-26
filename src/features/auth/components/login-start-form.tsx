@@ -9,21 +9,30 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { isValidRollNumber } from '@/utils/roll'
+import { zodResolver } from '@hookform/resolvers/zod'
 import { ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
-import { UseFormReturn } from 'react-hook-form'
+import { useForm } from 'react-hook-form'
+import { z } from 'zod'
+
+const rollSchema = z.object({
+  roll: z
+    .string()
+    .trim()
+    .refine(isValidRollNumber, 'Enter a valid roll number.'),
+})
 
 type LoginStartFormProps = {
-  form: UseFormReturn<{ roll: string }>
-  isSubmitting: boolean
-  onSubmit: (values: { roll: string }) => void
+  onSubmit: (values: z.infer<typeof rollSchema>) => void
 }
 
-export function LoginStartForm({
-  form,
-  isSubmitting,
-  onSubmit,
-}: LoginStartFormProps) {
+export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
+  const form = useForm<z.infer<typeof rollSchema>>({
+    defaultValues: { roll: '' },
+    resolver: zodResolver(rollSchema),
+  })
+
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
@@ -63,7 +72,6 @@ export function LoginStartForm({
                         event.target.value.replace(/\D/g, '').slice(0, 7)
                       )
                     }
-                    disabled={isSubmitting}
                   />
                 </FormControl>
                 <FormDescription>
@@ -75,7 +83,7 @@ export function LoginStartForm({
           />
 
           <Button type="submit" className="h-11 w-full rounded-full">
-            <Loading loading={isSubmitting}>Continue</Loading>
+            <Loading loading={false}>Continue</Loading>
           </Button>
 
           <p className="text-center text-sm text-slate-500">
