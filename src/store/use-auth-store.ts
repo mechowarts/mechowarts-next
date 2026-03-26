@@ -8,14 +8,12 @@ import {
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 
-type AuthStatus = 'authenticated' | 'loading' | 'unauthenticated'
-
 export const useAuthStore = create(
   combine(
     {
       authLoaded: false,
 
-      status: 'loading' as AuthStatus,
+      status: 'loading' as 'authenticated' | 'loading' | 'unauthenticated',
       user: null as AuthUser | null,
     },
     (set, get) => ({
