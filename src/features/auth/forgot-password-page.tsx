@@ -1,8 +1,8 @@
 import { ForgetPasswordConfirmForm } from '@/features/auth/components/forget-password-confirm-form'
 import { ForgetPasswordRequestForm } from '@/features/auth/components/forget-password-request-form'
 import {
-  requestResetPasswordOTPAction,
   confirmResetPasswordOTPAction,
+  requestResetPasswordOTPAction,
 } from '@/server/actions/auth.actions'
 import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
