@@ -2,7 +2,7 @@
 
 import 'server-only'
 
-import { requireSession } from '@/server/helpers/session'
+import { requireAuthUser } from '@/server/helpers/session'
 import { prisma } from '@/server/lib/prisma'
 import { z } from 'zod'
 
@@ -55,11 +55,11 @@ export async function createPost(input: {
   imageUrl?: string
   location?: string
 }) {
-  const session = await requireSession()
+  const session = await requireAuthUser()
   const body = postInputSchema.parse(input)
   return prisma.post.create({
     data: {
-      authorId: session.user.id,
+      authorId: session.id,
       caption: body.caption,
       location: body.location,
       imageUrl: body.imageUrl,
@@ -83,7 +83,7 @@ export async function updatePost(
   postId: string,
   input: { caption: string; imageUrl?: string; location?: string }
 ) {
-  const session = await requireSession()
+  const session = await requireAuthUser()
   const body = postInputSchema.parse(input)
   const post = await prisma.post.findUnique({
     where: { id: postId },
@@ -96,7 +96,7 @@ export async function updatePost(
     throw new Error('Post not found.')
   }
 
-  if (post.authorId !== session.user.id) {
+  if (post.authorId !== session.id) {
     throw new Error('You cannot edit this post.')
   }
 
@@ -123,7 +123,7 @@ export async function updatePost(
 }
 
 export async function savePost(postId: string) {
-  const session = await requireSession()
+  const session = await requireAuthUser()
   const post = await prisma.post.findUnique({
     where: { id: postId },
     select: { id: true },
@@ -136,12 +136,12 @@ export async function savePost(postId: string) {
   await prisma.postSave.upsert({
     where: {
       userId_postId: {
-        userId: session.user.id,
+        userId: session.id,
         postId,
       },
     },
     create: {
-      userId: session.user.id,
+      userId: session.id,
       postId,
     },
     update: {},
@@ -151,11 +151,11 @@ export async function savePost(postId: string) {
 }
 
 export async function unsavePost(postId: string) {
-  const session = await requireSession()
+  const session = await requireAuthUser()
 
   await prisma.postSave.deleteMany({
     where: {
-      userId: session.user.id,
+      userId: session.id,
       postId,
     },
   })

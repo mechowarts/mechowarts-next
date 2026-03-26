@@ -2,7 +2,7 @@
 
 import 'server-only'
 
-import { requireSession } from '@/server/helpers/session'
+import { requireAuthUser } from '@/server/helpers/session'
 import { prisma } from '@/server/lib/prisma'
 import { z } from 'zod'
 
@@ -102,9 +102,9 @@ export async function updateUserProfile(
   userId: string,
   input: z.infer<typeof updateUserSchema>
 ) {
-  const session = await requireSession()
+  const session = await requireAuthUser()
 
-  if (session.user.id !== userId) {
+  if (session.id !== userId) {
     throw new Error('You cannot update this profile.')
   }
 

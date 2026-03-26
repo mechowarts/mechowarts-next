@@ -1,15 +1,14 @@
 'use client'
 
-import { getAuthUser, type AuthUser } from '@/server/helpers/session'
+import {
+  clearSessionCookie,
+  getAuthUser,
+  type AuthUser,
+} from '@/server/helpers/session'
 import { create } from 'zustand'
 import { combine } from 'zustand/middleware'
 
 type AuthStatus = 'authenticated' | 'loading' | 'unauthenticated'
-
-type AuthActions = {
-  init: () => Promise<void>
-  refetch: () => Promise<void>
-}
 
 export const useAuthStore = create(
   combine(
@@ -19,7 +18,7 @@ export const useAuthStore = create(
       status: 'loading' as AuthStatus,
       user: null as AuthUser | null,
     },
-    (set, get): AuthActions => ({
+    (set, get) => ({
       async init() {
         if (get().authLoaded) return
 
@@ -58,6 +57,15 @@ export const useAuthStore = create(
             user: null,
           })
         }
+      },
+
+      async signOut() {
+        await clearSessionCookie()
+        set({
+          authLoaded: true,
+          status: 'unauthenticated',
+          user: null,
+        })
       },
     })
   )
