@@ -20,8 +20,9 @@ import {
 } from '@/server/actions/auth.actions'
 import { buildStudentEmail } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowLeft01Icon, Mail01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation } from '@tanstack/react-query'
-import { ArrowLeft, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -59,62 +60,48 @@ export function RegisterConfirmForm({
   const email = buildStudentEmail(data.roll)
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3 text-center">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
+    <div className="mx-auto w-full max-w-sm">
+      <div className="bg-card rounded-2xl border p-8">
+        <div className="mb-6 flex items-center justify-between">
+          <Button
+            type="button"
+            variant="ghost"
+            size="sm"
+            className="text-muted-foreground hover:text-foreground h-auto px-0"
+            onClick={onBack}
+          >
+            <HugeiconsIcon icon={ArrowLeft01Icon} className="mr-1 size-4" />
+            Back
+          </Button>
+        </div>
+
+        <div className="mb-6 text-center">
+          <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
             Verify your email
           </h1>
-          <p className="text-sm leading-6 text-slate-600 sm:text-base">
-            Enter the six-digit code sent to your student inbox to activate your
-            account.
+          <p className="text-muted-foreground text-sm">
+            Enter the 6-digit code we sent you
           </p>
         </div>
-      </div>
 
-      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6">
-        <Button
-          type="button"
-          variant="ghost"
-          className="-ml-3 h-auto justify-start px-3 text-slate-600 hover:text-slate-900"
-          onClick={onBack}
-        >
-          <ArrowLeft className="size-4" />
-          Back to details
-        </Button>
-
-        <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-          <div className="flex items-start gap-3 text-left">
-            <div className="rounded-2xl bg-white p-2 text-slate-700 ring-1 ring-slate-200">
-              <MailCheck className="size-5" />
-            </div>
-            <div>
-              <p className="text-sm font-semibold text-slate-900">
-                Verification code sent
-              </p>
-              <p className="mt-1 text-sm text-slate-600">{email}</p>
-            </div>
+        <div className="bg-muted/40 mb-6 flex items-center gap-3 rounded-xl border p-4">
+          <div className="bg-background flex size-10 shrink-0 items-center justify-center rounded-xl border">
+            <HugeiconsIcon
+              icon={Mail01Icon}
+              className="text-muted-foreground size-5"
+            />
           </div>
-
-          <div className="grid gap-3 rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600 sm:grid-cols-2">
-            <div>
-              <p className="text-xs font-medium tracking-[0.2em] text-slate-500 uppercase">
-                Name
-              </p>
-              <p className="mt-1 font-medium text-slate-900">{data.name}</p>
-            </div>
-            <div>
-              <p className="text-xs font-medium tracking-[0.2em] text-slate-500 uppercase">
-                Roll
-              </p>
-              <p className="mt-1 font-medium text-slate-900">{data.roll}</p>
-            </div>
+          <div className="min-w-0">
+            <p className="text-foreground truncate text-sm font-medium">
+              {email}
+            </p>
+            <p className="text-muted-foreground text-xs">Roll {data.roll}</p>
           </div>
         </div>
 
         <Form {...form}>
           <form
-            className="space-y-5"
+            className="space-y-6"
             onSubmit={form.handleSubmit(({ otp }) => {
               registerMutation.mutate(
                 {
@@ -129,11 +116,12 @@ export function RegisterConfirmForm({
                 },
                 {
                   onError(error) {
-                    toast.error(
-                      error instanceof Error
-                        ? error.message
-                        : 'Registration failed.'
-                    )
+                    form.setError('otp', {
+                      message:
+                        error instanceof Error
+                          ? error.message
+                          : 'Registration failed.',
+                    })
                   },
                   onSuccess() {
                     toast.success('Account created. Logging you in now.')
@@ -148,21 +136,21 @@ export function RegisterConfirmForm({
               name="otp"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Verification code</FormLabel>
+                  <FormLabel>Verification Code</FormLabel>
                   <FormControl>
                     <InputOTP
                       maxLength={6}
                       value={field.value}
                       onChange={field.onChange}
                       disabled={isBusy}
-                      containerClassName="w-full justify-center"
+                      containerClassName="w-full justify-center gap-2"
                     >
-                      <InputOTPGroup>
+                      <InputOTPGroup className="gap-2">
                         {Array.from({ length: 6 }).map((_, index) => (
                           <InputOTPSlot
                             key={index}
                             index={index}
-                            className="h-12 w-12 rounded-xl border border-slate-300 bg-white text-base first:rounded-xl first:border last:rounded-xl"
+                            className="bg-background h-12 w-12 rounded-lg border text-lg"
                           />
                         ))}
                       </InputOTPGroup>
@@ -173,10 +161,22 @@ export function RegisterConfirmForm({
               )}
             />
 
-            <div className="grid gap-3 sm:grid-cols-2">
+            <div className="space-y-3">
+              <Button
+                type="submit"
+                size="lg"
+                className="w-full"
+                disabled={isBusy}
+              >
+                Create Account
+                {registerMutation.isPending && <Spinner />}
+              </Button>
+
               <Button
                 type="button"
-                variant="outline"
+                variant="ghost"
+                size="sm"
+                className="text-muted-foreground hover:text-foreground h-auto w-full"
                 disabled={isBusy}
                 onClick={() => {
                   resendMutation.mutate(
@@ -188,7 +188,7 @@ export function RegisterConfirmForm({
                         toast.error(
                           error instanceof Error
                             ? error.message
-                            : 'Could not resend the verification code.'
+                            : 'Could not resend the code.'
                         )
                       },
                       onSuccess(next) {
@@ -196,21 +196,14 @@ export function RegisterConfirmForm({
                           [...current, next.token].slice(-5)
                         )
                         form.reset({ otp: '' })
-                        toast.success(
-                          'A fresh verification code is on the way.'
-                        )
+                        toast.success('A fresh code is on the way.')
                       },
                     }
                   )
                 }}
               >
-                Resend OTP
+                Resend code
                 {resendMutation.isPending && <Spinner />}
-              </Button>
-
-              <Button type="submit" className="rounded-full" disabled={isBusy}>
-                Verify and create account
-                {registerMutation.isPending && <Spinner />}
               </Button>
             </div>
           </form>
