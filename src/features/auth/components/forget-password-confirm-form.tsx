@@ -13,41 +13,57 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import type { ForgotPasswordFlowData } from '@/features/auth/components/forget-password-request-form'
+import {
+  confirmResetPasswordOTPAction,
+  requestResetPasswordOTPAction,
+} from '@/server/actions/auth.actions'
+import { buildStudentEmail } from '@/utils/roll'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, KeyRound, MailCheck } from 'lucide-react'
-import { UseFormReturn } from 'react-hook-form'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
+const resetSchema = z
+  .object({
+    confirmPassword: z.string(),
+    otp: z.string().length(6, 'Enter the six-digit code.'),
+    password: z.string().min(8, 'Password must be at least 8 characters long.'),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords do not match.',
+    path: ['confirmPassword'],
+  })
 
 type ForgetPasswordConfirmFormProps = {
-  canSubmit: boolean
-  email: string
-  form: UseFormReturn<{
-    confirmPassword: string
-    otp: string
-    password: string
-  }>
-  isResetting: boolean
-  isResending: boolean
+  data: ForgotPasswordFlowData
   onBack: () => void
-  onResend: () => void
-  onSubmit: (values: {
-    confirmPassword: string
-    otp: string
-    password: string
-  }) => void
-  roll: string
 }
 
 export function ForgetPasswordConfirmForm({
-  canSubmit,
-  email,
-  form,
-  isResetting,
-  isResending,
+  data,
   onBack,
-  onResend,
-  onSubmit,
-  roll,
 }: ForgetPasswordConfirmFormProps) {
-  const isBusy = isResetting || isResending
+  const form = useForm<z.infer<typeof resetSchema>>({
+    defaultValues: {
+      confirmPassword: '',
+      otp: '',
+      password: '',
+    },
+    resolver: zodResolver(resetSchema),
+  })
+  const [tokens, setTokens] = useState(data.tokens)
+  const resendMutation = useMutation({
+    mutationFn: requestResetPasswordOTPAction,
+  })
+  const resetPasswordMutation = useMutation({
+    mutationFn: confirmResetPasswordOTPAction,
+  })
+  const isBusy = resendMutation.isPending || resetPasswordMutation.isPending
+  const email = buildStudentEmail(data.roll)
 
   return (
     <div className="space-y-6">
@@ -92,12 +108,36 @@ export function ForgetPasswordConfirmForm({
 
           <div className="rounded-2xl border border-slate-200 bg-white p-4 text-sm text-slate-600">
             Resetting the password for roll{' '}
-            <span className="font-semibold text-slate-900">{roll}</span>.
+            <span className="font-semibold text-slate-900">{data.roll}</span>.
           </div>
         </div>
 
         <Form {...form}>
-          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="space-y-5"
+            onSubmit={form.handleSubmit(({ otp, password }) => {
+              resetPasswordMutation.mutate(
+                {
+                  otp,
+                  password,
+                  tokens,
+                },
+                {
+                  onError(error) {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : 'Could not reset the password.'
+                    )
+                  },
+                  onSuccess() {
+                    toast.success('Password updated. Logging you in now.')
+                    window.location.assign('/')
+                  },
+                }
+              )
+            })}
+          >
             <FormField
               control={form.control}
               name="otp"
@@ -175,17 +215,37 @@ export function ForgetPasswordConfirmForm({
                 type="button"
                 variant="outline"
                 disabled={isBusy}
-                onClick={onResend}
+                onClick={() => {
+                  resendMutation.mutate(
+                    {
+                      roll: Number.parseInt(data.roll, 10),
+                    },
+                    {
+                      onError(error) {
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : 'Could not resend the recovery code.'
+                        )
+                      },
+                      onSuccess(next) {
+                        setTokens((current) =>
+                          [...current, next.token].slice(-5)
+                        )
+                        form.setValue('otp', '')
+                        toast.success('A fresh recovery code is on the way.')
+                      },
+                    }
+                  )
+                }}
               >
-                <Loading loading={isResending}>Resend OTP</Loading>
+                <Loading loading={resendMutation.isPending}>Resend OTP</Loading>
               </Button>
 
-              <Button
-                type="submit"
-                className="rounded-full"
-                disabled={isBusy || !canSubmit}
-              >
-                <Loading loading={isResetting}>Verify and continue</Loading>
+              <Button type="submit" className="rounded-full" disabled={isBusy}>
+                <Loading loading={resetPasswordMutation.isPending}>
+                  Verify and continue
+                </Loading>
               </Button>
             </div>
           </form>

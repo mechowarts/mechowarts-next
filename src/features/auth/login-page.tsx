@@ -7,8 +7,8 @@ export function LoginPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
 
-  const [selectedRoll, setSelectedRoll] = useState(
-    () => searchParams.get('roll') ?? ''
+  const [selectedRoll, setSelectedRoll] = useState(() =>
+    searchParams.get('roll')
   )
 
   return (

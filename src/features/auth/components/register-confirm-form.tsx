@@ -12,35 +12,46 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import type { RegisterFlowData } from '@/features/auth/components/register-request-form'
+import {
+  confirmRegisterOTPAction,
+  requestRegisterOTPAction,
+} from '@/server/actions/auth.actions'
+import { buildStudentEmail } from '@/utils/roll'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { ArrowLeft, MailCheck, Sparkles } from 'lucide-react'
-import { UseFormReturn } from 'react-hook-form'
+import { useState } from 'react'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
+const otpSchema = z.object({
+  otp: z.string().length(6, 'Enter the six-digit code.'),
+})
 
 type RegisterConfirmFormProps = {
-  canSubmit: boolean
-  email: string
-  form: UseFormReturn<{ otp: string }>
-  isRegistering: boolean
-  isResending: boolean
-  name: string
+  data: RegisterFlowData
   onBack: () => void
-  onResend: () => void
-  onSubmit: (values: { otp: string }) => void
-  roll: string
 }
 
 export function RegisterConfirmForm({
-  canSubmit,
-  email,
-  form,
-  isRegistering,
-  isResending,
-  name,
+  data,
   onBack,
-  onResend,
-  onSubmit,
-  roll,
 }: RegisterConfirmFormProps) {
-  const isBusy = isRegistering || isResending
+  const form = useForm<z.infer<typeof otpSchema>>({
+    defaultValues: { otp: '' },
+    resolver: zodResolver(otpSchema),
+  })
+  const [tokens, setTokens] = useState(data.tokens)
+  const resendMutation = useMutation({
+    mutationFn: requestRegisterOTPAction,
+  })
+  const registerMutation = useMutation({
+    mutationFn: confirmRegisterOTPAction,
+  })
+  const isBusy = resendMutation.isPending || registerMutation.isPending
+  const email = buildStudentEmail(data.roll)
 
   return (
     <div className="space-y-6">
@@ -89,19 +100,48 @@ export function RegisterConfirmForm({
               <p className="text-xs font-medium tracking-[0.2em] text-slate-500 uppercase">
                 Name
               </p>
-              <p className="mt-1 font-medium text-slate-900">{name}</p>
+              <p className="mt-1 font-medium text-slate-900">{data.name}</p>
             </div>
             <div>
               <p className="text-xs font-medium tracking-[0.2em] text-slate-500 uppercase">
                 Roll
               </p>
-              <p className="mt-1 font-medium text-slate-900">{roll}</p>
+              <p className="mt-1 font-medium text-slate-900">{data.roll}</p>
             </div>
           </div>
         </div>
 
         <Form {...form}>
-          <form className="space-y-5" onSubmit={form.handleSubmit(onSubmit)}>
+          <form
+            className="space-y-5"
+            onSubmit={form.handleSubmit(({ otp }) => {
+              registerMutation.mutate(
+                {
+                  gender: data.gender,
+                  location: data.location,
+                  name: data.name,
+                  otp,
+                  password: data.password,
+                  roll: Number.parseInt(data.roll, 10),
+                  tokens,
+                  visibility: data.visibility,
+                },
+                {
+                  onError(error) {
+                    toast.error(
+                      error instanceof Error
+                        ? error.message
+                        : 'Registration failed.'
+                    )
+                  },
+                  onSuccess() {
+                    toast.success('Account created. Logging you in now.')
+                    window.location.assign('/')
+                  },
+                }
+              )
+            })}
+          >
             <FormField
               control={form.control}
               name="otp"
@@ -137,17 +177,37 @@ export function RegisterConfirmForm({
                 type="button"
                 variant="outline"
                 disabled={isBusy}
-                onClick={onResend}
+                onClick={() => {
+                  resendMutation.mutate(
+                    {
+                      roll: Number.parseInt(data.roll, 10),
+                    },
+                    {
+                      onError(error) {
+                        toast.error(
+                          error instanceof Error
+                            ? error.message
+                            : 'Could not resend the verification code.'
+                        )
+                      },
+                      onSuccess(next) {
+                        setTokens((current) =>
+                          [...current, next.token].slice(-5)
+                        )
+                        form.reset({ otp: '' })
+                        toast.success(
+                          'A fresh verification code is on the way.'
+                        )
+                      },
+                    }
+                  )
+                }}
               >
-                <Loading loading={isResending}>Resend OTP</Loading>
+                <Loading loading={resendMutation.isPending}>Resend OTP</Loading>
               </Button>
 
-              <Button
-                type="submit"
-                className="rounded-full"
-                disabled={isBusy || !canSubmit}
-              >
-                <Loading loading={isRegistering}>
+              <Button type="submit" className="rounded-full" disabled={isBusy}>
+                <Loading loading={registerMutation.isPending}>
                   Verify and create account
                 </Loading>
               </Button>

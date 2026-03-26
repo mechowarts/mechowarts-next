@@ -16,39 +16,71 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { requestRegisterOTPAction } from '@/server/actions/auth.actions'
+import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { Sparkles } from 'lucide-react'
 import Link from 'next/link'
-import { UseFormReturn } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
+const registerDetailsSchema = z
+  .object({
+    confirmPassword: z.string(),
+    gender: z.enum(['female', 'male'], { error: 'Select a gender.' }),
+    location: z.string().trim().min(1, 'Location is required.'),
+    name: z.string().trim().min(1, 'Name is required.'),
+    password: z.string().min(8, 'Password must be at least 8 characters long.'),
+    roll: z
+      .string()
+      .trim()
+      .refine(isValidRollNumber, 'Enter a valid roll number.'),
+    visibility: z.enum(['public', 'private'], {
+      error: 'Select profile visibility.',
+    }),
+  })
+  .refine((values) => values.password === values.confirmPassword, {
+    message: 'Passwords do not match.',
+    path: ['confirmPassword'],
+  })
+
+export type RegisterFlowData = z.infer<typeof registerDetailsSchema> & {
+  tokens: string[]
+}
 
 type RegisterRequestFormProps = {
-  currentEmail: string
-  form: UseFormReturn<{
-    confirmPassword: string
-    gender: 'female' | 'male'
-    location: string
-    name: string
-    password: string
-    roll: string
-    visibility: 'private' | 'public'
-  }>
-  isSubmitting: boolean
-  onSubmit: (values: {
-    confirmPassword: string
-    gender: 'female' | 'male'
-    location: string
-    name: string
-    password: string
-    roll: string
-    visibility: 'private' | 'public'
-  }) => void
+  defaultValues?: RegisterFlowData
+  onSubmit: (values: RegisterFlowData) => void
 }
 
 export function RegisterRequestForm({
-  currentEmail,
-  form,
-  isSubmitting,
+  defaultValues,
   onSubmit,
 }: RegisterRequestFormProps) {
+  const router = useRouter()
+  const form = useForm<z.infer<typeof registerDetailsSchema>>({
+    defaultValues: {
+      confirmPassword: defaultValues?.confirmPassword ?? '',
+      gender: defaultValues?.gender ?? 'male',
+      location: defaultValues?.location ?? '',
+      name: defaultValues?.name ?? '',
+      password: defaultValues?.password ?? '',
+      roll: defaultValues?.roll ?? '',
+      visibility: defaultValues?.visibility ?? 'public',
+    },
+    resolver: zodResolver(registerDetailsSchema),
+  })
+  const requestOtpMutation = useMutation({
+    mutationFn: requestRegisterOTPAction,
+  })
+  const currentRoll = form.watch('roll')
+  const currentEmail = isValidRollNumber(currentRoll)
+    ? buildStudentEmail(currentRoll)
+    : ''
+
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
@@ -70,7 +102,30 @@ export function RegisterRequestForm({
       <Form {...form}>
         <form
           className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit((values) => {
+            requestOtpMutation.mutate(
+              {
+                roll: Number.parseInt(values.roll, 10),
+              },
+              {
+                onError(error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : 'Could not send the verification code.'
+                  )
+                },
+                onSuccess(data) {
+                  onSubmit({
+                    ...values,
+                    tokens: [data.token],
+                  })
+                  router.replace(`/register?roll=${values.roll}`)
+                  toast.success('Verification code sent to your student email.')
+                },
+              }
+            )
+          })}
         >
           <div className="grid gap-4 sm:grid-cols-2">
             <FormField
@@ -89,7 +144,7 @@ export function RegisterRequestForm({
                           event.target.value.replace(/\D/g, '').slice(0, 7)
                         )
                       }
-                      disabled={isSubmitting}
+                      disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
                   <FormDescription>
@@ -111,7 +166,7 @@ export function RegisterRequestForm({
                     <Input
                       {...field}
                       placeholder="Nazmus Sayad"
-                      disabled={isSubmitting}
+                      disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -130,7 +185,7 @@ export function RegisterRequestForm({
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={isSubmitting}
+                    disabled={requestOtpMutation.isPending}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -157,7 +212,7 @@ export function RegisterRequestForm({
                     <Input
                       {...field}
                       placeholder="Chittagong"
-                      disabled={isSubmitting}
+                      disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -176,7 +231,7 @@ export function RegisterRequestForm({
                   <Select
                     value={field.value}
                     onValueChange={field.onChange}
-                    disabled={isSubmitting}
+                    disabled={requestOtpMutation.isPending}
                   >
                     <FormControl>
                       <SelectTrigger>
@@ -218,7 +273,7 @@ export function RegisterRequestForm({
                       type="password"
                       autoComplete="new-password"
                       placeholder="Create a password"
-                      disabled={isSubmitting}
+                      disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -238,7 +293,7 @@ export function RegisterRequestForm({
                       type="password"
                       autoComplete="new-password"
                       placeholder="Repeat the password"
-                      disabled={isSubmitting}
+                      disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
                   <FormMessage />
@@ -250,9 +305,11 @@ export function RegisterRequestForm({
           <Button
             type="submit"
             className="h-11 w-full rounded-full"
-            disabled={isSubmitting}
+            disabled={requestOtpMutation.isPending}
           >
-            <Loading loading={isSubmitting}>Request OTP</Loading>
+            <Loading loading={requestOtpMutation.isPending}>
+              Request OTP
+            </Loading>
           </Button>
 
           <p className="text-center text-sm text-slate-500">

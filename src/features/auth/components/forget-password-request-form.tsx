@@ -9,23 +9,51 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { requestResetPasswordOTPAction } from '@/server/actions/auth.actions'
+import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
+import { zodResolver } from '@hookform/resolvers/zod'
+import { useMutation } from '@tanstack/react-query'
 import { KeyRound } from 'lucide-react'
 import Link from 'next/link'
-import { UseFormReturn } from 'react-hook-form'
+import { useRouter } from 'next/navigation'
+import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
+import { z } from 'zod'
+
+const rollSchema = z.object({
+  roll: z
+    .string()
+    .trim()
+    .refine(isValidRollNumber, 'Enter a valid roll number.'),
+})
+
+export type ForgotPasswordFlowData = {
+  roll: string
+  tokens: string[]
+}
 
 type ForgetPasswordRequestFormProps = {
-  currentEmail: string
-  form: UseFormReturn<{ roll: string }>
-  isSubmitting: boolean
-  onSubmit: (values: { roll: string }) => void
+  defaultRoll: string
+  onSubmit: (values: ForgotPasswordFlowData) => void
 }
 
 export function ForgetPasswordRequestForm({
-  currentEmail,
-  form,
-  isSubmitting,
+  defaultRoll,
   onSubmit,
 }: ForgetPasswordRequestFormProps) {
+  const router = useRouter()
+  const form = useForm<z.infer<typeof rollSchema>>({
+    defaultValues: { roll: defaultRoll },
+    resolver: zodResolver(rollSchema),
+  })
+  const requestOtpMutation = useMutation({
+    mutationFn: requestResetPasswordOTPAction,
+  })
+  const currentRoll = form.watch('roll')
+  const currentEmail = isValidRollNumber(currentRoll)
+    ? buildStudentEmail(currentRoll)
+    : ''
+
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
@@ -47,7 +75,27 @@ export function ForgetPasswordRequestForm({
       <Form {...form}>
         <form
           className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 shadow-sm"
-          onSubmit={form.handleSubmit(onSubmit)}
+          onSubmit={form.handleSubmit(({ roll }) => {
+            requestOtpMutation.mutate(
+              {
+                roll: Number.parseInt(roll, 10),
+              },
+              {
+                onError(error) {
+                  toast.error(
+                    error instanceof Error
+                      ? error.message
+                      : 'Could not send the recovery code.'
+                  )
+                },
+                onSuccess(data) {
+                  onSubmit({ roll, tokens: [data.token] })
+                  router.replace(`/forgot-password?roll=${roll}`)
+                  toast.success('Recovery code sent to your student email.')
+                },
+              }
+            )
+          })}
         >
           <FormField
             control={form.control}
@@ -65,7 +113,7 @@ export function ForgetPasswordRequestForm({
                         event.target.value.replace(/\D/g, '').slice(0, 7)
                       )
                     }
-                    disabled={isSubmitting}
+                    disabled={requestOtpMutation.isPending}
                   />
                 </FormControl>
                 <FormDescription>
@@ -80,9 +128,11 @@ export function ForgetPasswordRequestForm({
           <Button
             type="submit"
             className="h-11 w-full rounded-full"
-            disabled={isSubmitting}
+            disabled={requestOtpMutation.isPending}
           >
-            <Loading loading={isSubmitting}>Request OTP</Loading>
+            <Loading loading={requestOtpMutation.isPending}>
+              Request OTP
+            </Loading>
           </Button>
 
           <p className="text-center text-sm text-slate-500">
