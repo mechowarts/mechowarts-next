@@ -4,7 +4,8 @@
 
 ## UI/UX
 
-- DO NOT PUT "..." to indicate loading state. Use a spinner or skeleton instead.
+- Do not use `lucide-icons` for icons. Use `hugeicons` instead.
+- Do not put "..." to indicate loading state. Use a spinner or skeleton instead.
 
 ## React
 
