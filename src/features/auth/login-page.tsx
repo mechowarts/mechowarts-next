@@ -13,7 +13,7 @@ export function LoginPage() {
   )
 
   return (
-    <AuthLayout>
+    <AuthLayout size="sm">
       {selectedRoll ? (
         <LoginWithPasswordForm
           roll={selectedRoll}

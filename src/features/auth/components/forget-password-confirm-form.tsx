@@ -71,192 +71,187 @@ export function ForgetPasswordConfirmForm({
   const email = buildStudentEmail(data.roll)
 
   return (
-    <div className="mx-auto w-full max-w-sm">
-      <div className="bg-card rounded-2xl border p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground"
-            onClick={onBack}
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} className="mr-1 size-4" />
-            Back
-          </Button>
-        </div>
+    <div className="bg-card rounded-2xl border p-8">
+      <div className="relative mb-6">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground absolute top-1/2 -left-4 -translate-y-1/2"
+          onClick={onBack}
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="mr-1 size-4" />
+          Back
+        </Button>
 
-        <div className="mb-6 text-center">
-          <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
-            Reset password
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Enter the code sent to your email
+        <h1 className="text-foreground text-center text-2xl font-semibold tracking-tight">
+          Reset password
+        </h1>
+      </div>
+
+      <p className="text-muted-foreground mb-6 text-center text-sm">
+        Enter the code sent to your email
+      </p>
+
+      <div className="bg-muted/40 mb-6 flex items-center gap-3 rounded-xl border p-4">
+        <div className="bg-background flex size-10 shrink-0 items-center justify-center rounded-xl border">
+          <HugeiconsIcon
+            icon={Mail01Icon}
+            className="text-muted-foreground size-5"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-foreground truncate text-sm font-medium">
+            {email}
           </p>
+          <p className="text-muted-foreground text-xs">Roll {data.roll}</p>
         </div>
+      </div>
 
-        <div className="bg-muted/40 mb-6 flex items-center gap-3 rounded-xl border p-4">
-          <div className="bg-background flex size-10 shrink-0 items-center justify-center rounded-xl border">
-            <HugeiconsIcon
-              icon={Mail01Icon}
-              className="text-muted-foreground size-5"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="text-foreground truncate text-sm font-medium">
-              {email}
-            </p>
-            <p className="text-muted-foreground text-xs">Roll {data.roll}</p>
-          </div>
-        </div>
-
-        <Form {...form}>
-          <form
-            className="space-y-5"
-            onSubmit={form.handleSubmit(({ otp, password }) => {
-              resetPasswordMutation.mutate(
-                {
-                  otp,
-                  password,
-                  tokens,
+      <Form {...form}>
+        <form
+          className="space-y-5"
+          onSubmit={form.handleSubmit(({ otp, password }) => {
+            resetPasswordMutation.mutate(
+              {
+                otp,
+                password,
+                tokens,
+              },
+              {
+                onError(error) {
+                  form.setError('otp', {
+                    message:
+                      error instanceof Error
+                        ? error.message
+                        : 'Could not reset the password.',
+                  })
                 },
-                {
-                  onError(error) {
-                    form.setError('otp', {
-                      message:
-                        error instanceof Error
-                          ? error.message
-                          : 'Could not reset the password.',
-                    })
-                  },
-                  onSuccess() {
-                    toast.success('Password updated. Logging you in now.')
-                    window.location.assign('/')
-                  },
-                }
-              )
-            })}
-          >
+                onSuccess() {
+                  toast.success('Password updated. Logging you in now.')
+                  window.location.assign('/')
+                },
+              }
+            )
+          })}
+        >
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Verification Code</FormLabel>
+                <FormControl>
+                  <InputOTP
+                    maxLength={6}
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isBusy}
+                    containerClassName="w-full justify-center gap-2"
+                  >
+                    <InputOTPGroup className="gap-2">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className="bg-background h-12 w-12 rounded-lg border text-lg"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-4">
             <FormField
               control={form.control}
-              name="otp"
+              name="password"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Verification Code</FormLabel>
+                  <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <InputOTP
-                      maxLength={6}
-                      value={field.value}
-                      onChange={field.onChange}
+                    <Input
+                      {...field}
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Enter new password"
                       disabled={isBusy}
-                      containerClassName="w-full justify-center gap-2"
-                    >
-                      <InputOTPGroup className="gap-2">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                          <InputOTPSlot
-                            key={index}
-                            index={index}
-                            className="bg-background h-12 w-12 rounded-lg border text-lg"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
+                    />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
 
-            <div className="space-y-4">
-              <FormField
-                control={form.control}
-                name="password"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>New Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="new-password"
-                        placeholder="Enter new password"
-                        disabled={isBusy}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
+            <FormField
+              control={form.control}
+              name="confirmPassword"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Confirm Password</FormLabel>
+                  <FormControl>
+                    <Input
+                      {...field}
+                      type="password"
+                      autoComplete="new-password"
+                      placeholder="Repeat password"
+                      disabled={isBusy}
+                    />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+          </div>
 
-              <FormField
-                control={form.control}
-                name="confirmPassword"
-                render={({ field }) => (
-                  <FormItem>
-                    <FormLabel>Confirm Password</FormLabel>
-                    <FormControl>
-                      <Input
-                        {...field}
-                        type="password"
-                        autoComplete="new-password"
-                        placeholder="Repeat password"
-                        disabled={isBusy}
-                      />
-                    </FormControl>
-                    <FormMessage />
-                  </FormItem>
-                )}
-              />
-            </div>
+          <div className="space-y-2 pt-2">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={isBusy}
+            >
+              Reset Password
+              {resetPasswordMutation.isPending && <Spinner />}
+            </Button>
 
-            <div className="space-y-2 pt-2">
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={isBusy}
-              >
-                Reset Password
-                {resetPasswordMutation.isPending && <Spinner />}
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground w-full"
-                disabled={isBusy}
-                onClick={() => {
-                  resendMutation.mutate(
-                    {
-                      roll: Number.parseInt(data.roll, 10),
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground w-full"
+              disabled={isBusy}
+              onClick={() => {
+                resendMutation.mutate(
+                  {
+                    roll: Number.parseInt(data.roll, 10),
+                  },
+                  {
+                    onError(error) {
+                      toast.error(
+                        error instanceof Error
+                          ? error.message
+                          : 'Could not resend the code.'
+                      )
                     },
-                    {
-                      onError(error) {
-                        toast.error(
-                          error instanceof Error
-                            ? error.message
-                            : 'Could not resend the code.'
-                        )
-                      },
-                      onSuccess(next) {
-                        setTokens((current) =>
-                          [...current, next.token].slice(-5)
-                        )
-                        form.setValue('otp', '')
-                        toast.success('A fresh code is on the way.')
-                      },
-                    }
-                  )
-                }}
-              >
-                Resend code
-                {resendMutation.isPending && <Spinner />}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
+                    onSuccess(next) {
+                      setTokens((current) => [...current, next.token].slice(-5))
+                      form.setValue('otp', '')
+                      toast.success('A fresh code is on the way.')
+                    },
+                  }
+                )
+              }}
+            >
+              Resend code
+              {resendMutation.isPending && <Spinner />}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }

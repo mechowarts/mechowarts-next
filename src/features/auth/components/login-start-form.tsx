@@ -35,7 +35,7 @@ export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
   })
 
   return (
-    <div className="mx-auto w-full max-w-sm">
+    <>
       <div className="bg-card rounded-2xl border p-8">
         <div className="mb-8 text-center">
           <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
@@ -104,6 +104,6 @@ export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
       <p className="text-muted-foreground mt-6 text-center text-[11px]">
         Format: 7 digits (e.g., 2108061)
       </p>
-    </div>
+    </>
   )
 }

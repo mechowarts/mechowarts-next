@@ -60,155 +60,152 @@ export function RegisterConfirmForm({
   const email = buildStudentEmail(data.roll)
 
   return (
-    <div className="mx-auto w-full max-w-sm">
-      <div className="bg-card rounded-2xl border p-8">
-        <div className="mb-6 flex items-center justify-between">
-          <Button
-            type="button"
-            variant="ghost"
-            size="sm"
-            className="text-muted-foreground hover:text-foreground h-auto px-0"
-            onClick={onBack}
-          >
-            <HugeiconsIcon icon={ArrowLeft01Icon} className="mr-1 size-4" />
-            Back
-          </Button>
-        </div>
+    <div className="bg-card rounded-2xl border p-8">
+      <div className="mb-6 flex items-center justify-between">
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          className="text-muted-foreground hover:text-foreground"
+          onClick={onBack}
+        >
+          <HugeiconsIcon icon={ArrowLeft01Icon} className="mr-1 size-4" />
+          Back
+        </Button>
 
-        <div className="mb-6 text-center">
-          <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
-            Verify your email
-          </h1>
-          <p className="text-muted-foreground text-sm">
-            Enter the 6-digit code we sent you
+        <h1 className="text-foreground text-2xl font-semibold tracking-tight whitespace-nowrap">
+          Verify email
+        </h1>
+
+        <div className="w-[60px]" />
+      </div>
+
+      <p className="text-muted-foreground mb-6 text-center text-sm">
+        Enter the 6-digit code we sent you
+      </p>
+
+      <div className="bg-muted/40 mb-6 flex items-center gap-3 rounded-xl border p-4">
+        <div className="bg-background flex size-10 shrink-0 items-center justify-center rounded-xl border">
+          <HugeiconsIcon
+            icon={Mail01Icon}
+            className="text-muted-foreground size-5"
+          />
+        </div>
+        <div className="min-w-0">
+          <p className="text-foreground truncate text-sm font-medium">
+            {email}
           </p>
+          <p className="text-muted-foreground text-xs">Roll {data.roll}</p>
         </div>
+      </div>
 
-        <div className="bg-muted/40 mb-6 flex items-center gap-3 rounded-xl border p-4">
-          <div className="bg-background flex size-10 shrink-0 items-center justify-center rounded-xl border">
-            <HugeiconsIcon
-              icon={Mail01Icon}
-              className="text-muted-foreground size-5"
-            />
-          </div>
-          <div className="min-w-0">
-            <p className="text-foreground truncate text-sm font-medium">
-              {email}
-            </p>
-            <p className="text-muted-foreground text-xs">Roll {data.roll}</p>
-          </div>
-        </div>
-
-        <Form {...form}>
-          <form
-            className="space-y-6"
-            onSubmit={form.handleSubmit(({ otp }) => {
-              registerMutation.mutate(
-                {
-                  gender: data.gender,
-                  location: data.location,
-                  name: data.name,
-                  otp,
-                  password: data.password,
-                  roll: Number.parseInt(data.roll, 10),
-                  tokens,
-                  visibility: data.visibility,
+      <Form {...form}>
+        <form
+          className="space-y-6"
+          onSubmit={form.handleSubmit(({ otp }) => {
+            registerMutation.mutate(
+              {
+                gender: data.gender,
+                location: data.location,
+                name: data.name,
+                otp,
+                password: data.password,
+                roll: Number.parseInt(data.roll, 10),
+                tokens,
+                visibility: data.visibility,
+              },
+              {
+                onError(error) {
+                  form.setError('otp', {
+                    message:
+                      error instanceof Error
+                        ? error.message
+                        : 'Registration failed.',
+                  })
                 },
-                {
-                  onError(error) {
-                    form.setError('otp', {
-                      message:
+                onSuccess() {
+                  toast.success('Account created. Logging you in now.')
+                  window.location.assign('/')
+                },
+              }
+            )
+          })}
+        >
+          <FormField
+            control={form.control}
+            name="otp"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Verification Code</FormLabel>
+                <FormControl>
+                  <InputOTP
+                    maxLength={6}
+                    value={field.value}
+                    onChange={field.onChange}
+                    disabled={isBusy}
+                    containerClassName="w-full justify-center gap-2"
+                  >
+                    <InputOTPGroup className="gap-2">
+                      {Array.from({ length: 6 }).map((_, index) => (
+                        <InputOTPSlot
+                          key={index}
+                          index={index}
+                          className="bg-background h-12 w-12 rounded-lg border text-lg"
+                        />
+                      ))}
+                    </InputOTPGroup>
+                  </InputOTP>
+                </FormControl>
+                <FormMessage className="text-center" />
+              </FormItem>
+            )}
+          />
+
+          <div className="space-y-3">
+            <Button
+              type="submit"
+              size="lg"
+              className="w-full"
+              disabled={isBusy}
+            >
+              Create Account
+              {registerMutation.isPending && <Spinner />}
+            </Button>
+
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              className="text-muted-foreground hover:text-foreground h-auto w-full"
+              disabled={isBusy}
+              onClick={() => {
+                resendMutation.mutate(
+                  {
+                    roll: Number.parseInt(data.roll, 10),
+                  },
+                  {
+                    onError(error) {
+                      toast.error(
                         error instanceof Error
                           ? error.message
-                          : 'Registration failed.',
-                    })
-                  },
-                  onSuccess() {
-                    toast.success('Account created. Logging you in now.')
-                    window.location.assign('/')
-                  },
-                }
-              )
-            })}
-          >
-            <FormField
-              control={form.control}
-              name="otp"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Verification Code</FormLabel>
-                  <FormControl>
-                    <InputOTP
-                      maxLength={6}
-                      value={field.value}
-                      onChange={field.onChange}
-                      disabled={isBusy}
-                      containerClassName="w-full justify-center gap-2"
-                    >
-                      <InputOTPGroup className="gap-2">
-                        {Array.from({ length: 6 }).map((_, index) => (
-                          <InputOTPSlot
-                            key={index}
-                            index={index}
-                            className="bg-background h-12 w-12 rounded-lg border text-lg"
-                          />
-                        ))}
-                      </InputOTPGroup>
-                    </InputOTP>
-                  </FormControl>
-                  <FormMessage className="text-center" />
-                </FormItem>
-              )}
-            />
-
-            <div className="space-y-3">
-              <Button
-                type="submit"
-                size="lg"
-                className="w-full"
-                disabled={isBusy}
-              >
-                Create Account
-                {registerMutation.isPending && <Spinner />}
-              </Button>
-
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                className="text-muted-foreground hover:text-foreground h-auto w-full"
-                disabled={isBusy}
-                onClick={() => {
-                  resendMutation.mutate(
-                    {
-                      roll: Number.parseInt(data.roll, 10),
+                          : 'Could not resend the code.'
+                      )
                     },
-                    {
-                      onError(error) {
-                        toast.error(
-                          error instanceof Error
-                            ? error.message
-                            : 'Could not resend the code.'
-                        )
-                      },
-                      onSuccess(next) {
-                        setTokens((current) =>
-                          [...current, next.token].slice(-5)
-                        )
-                        form.reset({ otp: '' })
-                        toast.success('A fresh code is on the way.')
-                      },
-                    }
-                  )
-                }}
-              >
-                Resend code
-                {resendMutation.isPending && <Spinner />}
-              </Button>
-            </div>
-          </form>
-        </Form>
-      </div>
+                    onSuccess(next) {
+                      setTokens((current) => [...current, next.token].slice(-5))
+                      form.reset({ otp: '' })
+                      toast.success('A fresh code is on the way.')
+                    },
+                  }
+                )
+              }}
+            >
+              Resend code
+              {resendMutation.isPending && <Spinner />}
+            </Button>
+          </div>
+        </form>
+      </Form>
     </div>
   )
 }
