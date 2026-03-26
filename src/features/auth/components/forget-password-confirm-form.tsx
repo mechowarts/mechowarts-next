@@ -31,7 +31,7 @@ const resetSchema = z
   .object({
     confirmPassword: z.string(),
     otp: z.string().length(6, 'Enter the six-digit code.'),
-    password: z.string().min(8, 'Password must be at least 8 characters long.'),
+    password: z.string().min(6, 'Password must be at least 6 characters long.'),
   })
   .refine((values) => values.password === values.confirmPassword, {
     message: 'Passwords do not match.',
@@ -49,19 +49,22 @@ export function ForgetPasswordConfirmForm({
 }: ForgetPasswordConfirmFormProps) {
   const form = useForm<z.infer<typeof resetSchema>>({
     defaultValues: {
-      confirmPassword: '',
       otp: '',
       password: '',
+      confirmPassword: '',
     },
     resolver: zodResolver(resetSchema),
   })
+
   const [tokens, setTokens] = useState(data.tokens)
   const resendMutation = useMutation({
     mutationFn: requestResetPasswordOTPAction,
   })
+
   const resetPasswordMutation = useMutation({
     mutationFn: confirmResetPasswordOTPAction,
   })
+
   const isBusy = resendMutation.isPending || resetPasswordMutation.isPending
   const email = buildStudentEmail(data.roll)
 

@@ -43,13 +43,17 @@ export function RegisterConfirmForm({
     defaultValues: { otp: '' },
     resolver: zodResolver(otpSchema),
   })
+
   const [tokens, setTokens] = useState(data.tokens)
+
   const resendMutation = useMutation({
     mutationFn: requestRegisterOTPAction,
   })
+
   const registerMutation = useMutation({
     mutationFn: confirmRegisterOTPAction,
   })
+
   const isBusy = resendMutation.isPending || registerMutation.isPending
   const email = buildStudentEmail(data.roll)
 

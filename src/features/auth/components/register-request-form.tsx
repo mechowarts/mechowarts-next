@@ -33,7 +33,7 @@ const registerDetailsSchema = z
     gender: z.enum(['female', 'male'], { error: 'Select a gender.' }),
     location: z.string().trim().min(1, 'Location is required.'),
     name: z.string().trim().min(1, 'Name is required.'),
-    password: z.string().min(8, 'Password must be at least 8 characters long.'),
+    password: z.string().min(6, 'Password must be at least 6 characters long.'),
     roll: z
       .string()
       .trim()
