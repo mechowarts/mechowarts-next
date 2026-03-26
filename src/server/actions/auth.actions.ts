@@ -18,33 +18,7 @@ import { sendOtpEmail } from '@/server/lib/mailer'
 import { hashPassword, verifyPassword } from '@/server/lib/password'
 import { prisma } from '@/server/lib/prisma'
 import { buildStudentEmail } from '@/utils/roll'
-import { randomUUID } from 'node:crypto'
 import { z } from 'zod'
-
-function parseFacebookId(value: string | undefined) {
-  if (!value) {
-    return undefined
-  }
-
-  const trimmed = value.trim()
-
-  if (!trimmed) {
-    return undefined
-  }
-
-  if (!trimmed.includes('/')) {
-    return trimmed
-  }
-
-  try {
-    const url = new URL(trimmed)
-    const pathSegment = url.pathname.split('/').filter(Boolean).at(-1)
-
-    return pathSegment || undefined
-  } catch {
-    return trimmed
-  }
-}
 
 const requestOtpSchema = z.object({
   rollNumber: z.number().int().positive(),
@@ -56,16 +30,14 @@ const verifyOtpSchema = z.object({
 })
 
 const registerSchema = z.object({
-  bio: z.string().optional(),
-  bloodGroup: z.string().min(1),
-  facebookId: z.string().optional(),
+  gender: z.enum(['male', 'female']),
   location: z.string().min(1),
   name: z.string().min(1),
   otp: z.string().length(6),
   password: z.string().min(8),
-  phone: z.string().optional(),
   rollNumber: z.number().int().positive(),
   tokens: z.array(z.string().min(1)).min(1).max(authOtpTokenLimit),
+  visibility: z.enum(['public', 'private']),
 })
 
 const resetPasswordSchema = z.object({
@@ -190,20 +162,21 @@ export async function registerWithOtp(input: z.infer<typeof registerSchema>) {
     throw new Error('This roll number is already registered.')
   }
 
-  await prisma.user.create({
+  const user = await prisma.user.create({
     data: {
-      id: randomUUID(),
-      bio: body.bio,
-      bloodGroup: body.bloodGroup,
       email: payload.email,
-      facebookId: parseFacebookId(body.facebookId),
+      gender: body.gender,
       location: body.location,
       name: body.name,
       password: await hashPassword(body.password),
-      phone: body.phone,
       roll: payload.rollNumber,
-      visibility: 'public',
+      visibility: body.visibility,
     },
+  })
+
+  await setSessionCookie({
+    pca: null,
+    sub: user.id,
   })
 
   return { success: true }
@@ -303,12 +276,19 @@ export async function resetPassword(
     throw new Error('This code has already been used. Request a new one.')
   }
 
+  const passwordChangedAt = new Date()
+
   await prisma.user.update({
     where: { id: user.id },
     data: {
       password: await hashPassword(body.password),
-      passwordChangedAt: new Date(),
+      passwordChangedAt,
     },
+  })
+
+  await setSessionCookie({
+    pca: passwordChangedAt.getTime(),
+    sub: user.id,
   })
 
   return { rollNumber: payload.rollNumber, success: true }
