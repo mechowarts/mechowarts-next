@@ -21,8 +21,6 @@ type AuthenticatedState = {
 export function useAuth() {
   const result = authClient.useSession()
 
-  console.log(result.data?.session)
-
   return {
     user: result.data?.user,
 
