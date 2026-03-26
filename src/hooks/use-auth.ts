@@ -4,29 +4,27 @@ import type { Prettify } from 'daily-code'
 
 type SessionData = Prettify<typeof auth.$Infer.Session>
 
+export type AuthSessionUser = SessionData['user']
+
 type UnauthenticatedState = {
   state: 'loading' | 'unauthenticated'
-  refetch: () => Promise<void>
-
   user: null
-  session: null
+  refetch: () => Promise<void>
 }
 
 type AuthenticatedState = {
   state: 'authenticated'
+  user: AuthSessionUser
   refetch: () => Promise<void>
-
-  user: SessionData['user']
-
-  session: SessionData['session']
 }
 
 export function useAuth() {
   const result = authClient.useSession()
 
+  console.log(result.data?.session)
+
   return {
     user: result.data?.user,
-    session: result.data?.session,
 
     state: result.isPending
       ? 'loading'
