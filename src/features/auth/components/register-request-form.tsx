@@ -2,30 +2,24 @@ import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select'
+import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group'
 import { Spinner } from '@/components/ui/spinner'
 import { requestRegisterOTPAction } from '@/server/actions/auth.actions'
-import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
+import { isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { PasswordInput } from './password-input'
+import { RollNumberInput } from './roll-number-input'
 
 const registerDetailsSchema = z
   .object({
@@ -60,7 +54,6 @@ export function RegisterRequestForm({
   defaultValues,
   onSubmit,
 }: RegisterRequestFormProps) {
-  const router = useRouter()
   const form = useForm<z.infer<typeof registerDetailsSchema>>({
     defaultValues: {
       confirmPassword: defaultValues?.confirmPassword ?? '',
@@ -76,28 +69,22 @@ export function RegisterRequestForm({
   const requestOtpMutation = useMutation({
     mutationFn: requestRegisterOTPAction,
   })
-  const currentRoll = form.watch('roll')
-  const currentEmail = isValidRollNumber(currentRoll)
-    ? buildStudentEmail(currentRoll)
-    : ''
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3 text-center">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-            Create your MechoWarts account
-          </h1>
-          <p className="text-sm leading-6 text-slate-600 sm:text-base">
-            Complete your basic profile details, then verify your student email
-            with a one-time code.
-          </p>
-        </div>
+    <div className="bg-card rounded-2xl border p-8">
+      <div className="mb-8 text-center">
+        <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
+          Create your MechoWarts account
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Complete your basic profile details, then verify your student email
+          with a one-time code.
+        </p>
       </div>
 
       <Form {...form}>
         <form
-          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6"
+          className="space-y-6"
           onSubmit={form.handleSubmit((values) => {
             requestOtpMutation.mutate(
               {
@@ -116,88 +103,45 @@ export function RegisterRequestForm({
                     ...values,
                     tokens: [data.token],
                   })
-                  router.replace(`/register?roll=${values.roll}`)
                   toast.success('Verification code sent to your student email.')
                 },
               }
             )
           })}
         >
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="roll"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Roll number</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      inputMode="numeric"
-                      placeholder="2108061"
-                      onChange={(event) =>
-                        field.onChange(
-                          event.target.value.replace(/\D/g, '').slice(0, 7)
-                        )
-                      }
-                      disabled={requestOtpMutation.isPending}
-                    />
-                  </FormControl>
-                  <FormDescription>
-                    {currentEmail ||
-                      'We send the OTP to your RUET student email address.'}
-                  </FormDescription>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+          <FormField
+            control={form.control}
+            name="roll"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Roll Number</FormLabel>
+                <FormControl>
+                  <RollNumberInput {...field} />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
-            <FormField
-              control={form.control}
-              name="name"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Full name</FormLabel>
-                  <FormControl>
-                    <Input
-                      {...field}
-                      placeholder="Nazmus Sayad"
-                      disabled={requestOtpMutation.isPending}
-                    />
-                  </FormControl>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
-          </div>
-
-          <div className="grid gap-4 sm:grid-cols-2">
-            <FormField
-              control={form.control}
-              name="gender"
-              render={({ field }) => (
-                <FormItem>
-                  <FormLabel>Gender</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
+          <FormField
+            control={form.control}
+            name="name"
+            render={({ field }) => (
+              <FormItem>
+                <FormLabel>Full Name</FormLabel>
+                <FormControl>
+                  <Input
+                    {...field}
+                    placeholder="Your full name"
                     disabled={requestOtpMutation.isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select gender" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="male">Male</SelectItem>
-                      <SelectItem value="female">Female</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormMessage />
-                </FormItem>
-              )}
-            />
+                  />
+                </FormControl>
+                <FormMessage />
+              </FormItem>
+            )}
+          />
 
+          <div className="grid items-start gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="location"
@@ -207,7 +151,7 @@ export function RegisterRequestForm({
                   <FormControl>
                     <Input
                       {...field}
-                      placeholder="Chittagong"
+                      placeholder="Your location"
                       disabled={requestOtpMutation.isPending}
                     />
                   </FormControl>
@@ -215,48 +159,47 @@ export function RegisterRequestForm({
                 </FormItem>
               )}
             />
-          </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
-              name="visibility"
+              name="gender"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Profile visibility</FormLabel>
-                  <Select
-                    value={field.value}
-                    onValueChange={field.onChange}
-                    disabled={requestOtpMutation.isPending}
-                  >
-                    <FormControl>
-                      <SelectTrigger>
-                        <SelectValue placeholder="Select visibility" />
-                      </SelectTrigger>
-                    </FormControl>
-                    <SelectContent>
-                      <SelectItem value="public">Public</SelectItem>
-                      <SelectItem value="private">Private</SelectItem>
-                    </SelectContent>
-                  </Select>
-                  <FormDescription>
-                    Public profiles are visible in the community directory.
-                  </FormDescription>
+                  <FormLabel>Gender</FormLabel>
+                  <FormControl>
+                    <RadioGroup
+                      value={field.value}
+                      onValueChange={field.onChange}
+                      disabled={requestOtpMutation.isPending}
+                      className="flex gap-6 pt-2"
+                    >
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="male" id="male" />
+                        <label
+                          htmlFor="male"
+                          className="cursor-pointer text-sm font-medium"
+                        >
+                          Male
+                        </label>
+                      </div>
+                      <div className="flex items-center space-x-2">
+                        <RadioGroupItem value="female" id="female" />
+                        <label
+                          htmlFor="female"
+                          className="cursor-pointer text-sm font-medium"
+                        >
+                          Female
+                        </label>
+                      </div>
+                    </RadioGroup>
+                  </FormControl>
                   <FormMessage />
                 </FormItem>
               )}
             />
-
-            <div className="rounded-2xl border border-slate-200 bg-slate-50 p-4 text-sm text-slate-600">
-              The verification code will be sent to{' '}
-              <span className="font-semibold text-slate-900">
-                {currentEmail || 'your RUET student email'}
-              </span>
-              .
-            </div>
           </div>
 
-          <div className="grid gap-4 sm:grid-cols-2">
+          <div className="grid items-start gap-4 sm:grid-cols-2">
             <FormField
               control={form.control}
               name="password"
@@ -264,9 +207,8 @@ export function RegisterRequestForm({
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Create a password"
                       disabled={requestOtpMutation.isPending}
@@ -282,11 +224,10 @@ export function RegisterRequestForm({
               name="confirmPassword"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Confirm password</FormLabel>
+                  <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Repeat the password"
                       disabled={requestOtpMutation.isPending}
@@ -298,25 +239,27 @@ export function RegisterRequestForm({
             />
           </div>
 
-          <Button
-            type="submit"
-            className="h-11 w-full rounded-full"
-            disabled={requestOtpMutation.isPending}
-          >
-            Request OTP
-            {requestOtpMutation.isPending && <Spinner />}
-          </Button>
-
-          <p className="text-center text-sm text-slate-500">
-            Already have an account? Go back to{' '}
-            <Link
-              href="/login"
-              className="font-medium text-slate-900 underline-offset-4 hover:underline"
+          <div className="space-y-4 pt-2">
+            <Button
+              size="lg"
+              type="submit"
+              disabled={requestOtpMutation.isPending}
+              className="w-full"
             >
-              login
-            </Link>
-            .
-          </p>
+              Continue
+              {requestOtpMutation.isPending && <Spinner />}
+            </Button>
+
+            <p className="text-muted-foreground text-center text-sm">
+              Already have an account?{' '}
+              <Link
+                href="/login"
+                className="text-foreground hover:text-primary font-medium underline-offset-4 transition-colors hover:underline"
+              >
+                Sign in
+              </Link>
+            </p>
+          </div>
         </form>
       </Form>
     </div>

@@ -2,23 +2,21 @@ import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
-  FormDescription,
   FormField,
   FormItem,
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { requestResetPasswordOTPAction } from '@/server/actions/auth.actions'
-import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
+import { isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
 import Link from 'next/link'
-import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { RollNumberInput } from './roll-number-input'
 
 const rollSchema = z.object({
   roll: z
@@ -41,7 +39,6 @@ export function ForgetPasswordRequestForm({
   defaultRoll,
   onSubmit,
 }: ForgetPasswordRequestFormProps) {
-  const router = useRouter()
   const form = useForm<z.infer<typeof rollSchema>>({
     defaultValues: { roll: defaultRoll },
     resolver: zodResolver(rollSchema),
@@ -49,28 +46,22 @@ export function ForgetPasswordRequestForm({
   const requestOtpMutation = useMutation({
     mutationFn: requestResetPasswordOTPAction,
   })
-  const currentRoll = form.watch('roll')
-  const currentEmail = isValidRollNumber(currentRoll)
-    ? buildStudentEmail(currentRoll)
-    : ''
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3 text-center">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
-            Reset your password
-          </h1>
-          <p className="text-sm leading-6 text-slate-600 sm:text-base">
-            Enter your roll number and we will send a recovery code to your
-            student email.
-          </p>
-        </div>
+    <div className="bg-card rounded-2xl border p-8">
+      <div className="mb-8 text-center">
+        <h1 className="text-foreground mb-2 text-2xl font-semibold tracking-tight">
+          Reset your password
+        </h1>
+        <p className="text-muted-foreground text-sm">
+          Enter your roll number and we will send a recovery code to your
+          student email.
+        </p>
       </div>
 
       <Form {...form}>
         <form
-          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6"
+          className="space-y-6"
           onSubmit={form.handleSubmit(({ roll }) => {
             requestOtpMutation.mutate(
               {
@@ -86,7 +77,6 @@ export function ForgetPasswordRequestForm({
                 },
                 onSuccess(data) {
                   onSubmit({ roll, tokens: [data.token] })
-                  router.replace(`/forgot-password?roll=${roll}`)
                   toast.success('Recovery code sent to your student email.')
                 },
               }
@@ -98,48 +88,36 @@ export function ForgetPasswordRequestForm({
             name="roll"
             render={({ field }) => (
               <FormItem>
-                <FormLabel>Roll number</FormLabel>
+                <FormLabel>Roll Number</FormLabel>
                 <FormControl>
-                  <Input
-                    {...field}
-                    inputMode="numeric"
-                    placeholder="2108061"
-                    onChange={(event) =>
-                      field.onChange(
-                        event.target.value.replace(/\D/g, '').slice(0, 7)
-                      )
-                    }
-                    disabled={requestOtpMutation.isPending}
-                  />
+                  <RollNumberInput {...field} />
                 </FormControl>
-                <FormDescription>
-                  {currentEmail ||
-                    'We send the recovery OTP to your RUET student email.'}
-                </FormDescription>
                 <FormMessage />
               </FormItem>
             )}
           />
 
-          <Button
-            type="submit"
-            className="h-11 w-full rounded-full"
-            disabled={requestOtpMutation.isPending}
-          >
-            Request OTP
-            {requestOtpMutation.isPending && <Spinner />}
-          </Button>
-
-          <p className="text-center text-sm text-slate-500">
-            Remembered it? Go back to{' '}
-            <Link
-              href="/login"
-              className="font-medium text-slate-900 underline-offset-4 hover:underline"
+          <div className="space-y-4">
+            <Button
+              size="lg"
+              type="submit"
+              disabled={requestOtpMutation.isPending}
+              className="w-full"
             >
-              login
-            </Link>
-            .
-          </p>
+              Continue
+              {requestOtpMutation.isPending && <Spinner />}
+            </Button>
+
+            <p className="text-muted-foreground text-center text-sm">
+              Remembered it? Go back to{' '}
+              <Link
+                href="/login"
+                className="text-foreground hover:text-primary font-medium underline-offset-4 transition-colors hover:underline"
+              >
+                login
+              </Link>
+            </p>
+          </div>
         </form>
       </Form>
     </div>

@@ -41,13 +41,13 @@ export function RollNumberInput({
         onChange={(val) => updateDigits([digits[0], val, digits[2], digits[3]])}
       />
 
-      <div className="bg-muted text-muted-foreground flex aspect-[1/1.25] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
+      <div className="bg-muted text-muted-foreground flex aspect-[1/1.15] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
         0
       </div>
-      <div className="bg-muted text-muted-foreground flex aspect-[1/1.25] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
+      <div className="bg-muted text-muted-foreground flex aspect-[1/1.15] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
         8
       </div>
-      <div className="bg-muted text-muted-foreground flex aspect-[1/1.25] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
+      <div className="bg-muted text-muted-foreground flex aspect-[1/1.15] h-auto w-full items-center justify-center rounded-md border p-0 text-xl font-semibold">
         0
       </div>
 
@@ -108,7 +108,7 @@ function NumberInput({
           }
         }
       }}
-      className="bg-muted text-foreground hover:border-input focus:border-primary focus:bg-background focus:ring-primary/10 aspect-[1/1.25] h-auto w-full border p-0 text-center text-xl font-semibold transition-all focus:ring-2 disabled:opacity-50"
+      className="bg-muted text-foreground hover:border-input focus:border-primary focus:bg-background focus:ring-primary/10 aspect-[1/1.15] h-auto w-full border p-0 text-center text-xl font-semibold transition-all focus:ring-2 disabled:opacity-50"
     />
   )
 }

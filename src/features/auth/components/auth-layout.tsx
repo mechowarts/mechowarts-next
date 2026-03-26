@@ -5,7 +5,10 @@ import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
 import type { PropsWithChildren } from 'react'
 
-export function AuthLayout({ children }: PropsWithChildren) {
+export function AuthLayout({
+  children,
+  size = 'md',
+}: PropsWithChildren<{ size?: 'sm' | 'md' | 'lg' }>) {
   return (
     <main className="flex min-h-screen flex-col">
       <nav className="bg-background/95 sticky top-0 z-50 w-full border-b backdrop-blur">
@@ -24,7 +27,11 @@ export function AuthLayout({ children }: PropsWithChildren) {
       </nav>
 
       <div className="flex flex-1 items-center justify-center p-4">
-        <Wrapper maxWidth="48rem">{children}</Wrapper>
+        <Wrapper
+          maxWidth={size === 'sm' ? '24rem' : size === 'md' ? '28rem' : '32rem'}
+        >
+          {children}
+        </Wrapper>
       </div>
     </main>
   )
