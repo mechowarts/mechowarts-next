@@ -1,3 +1,6 @@
+'use server'
+import 'server-only'
+
 import { serverEnv } from '@/env.server'
 import { buildStudentEmail } from '@/utils/roll'
 import OneTimeJwt from 'one-time-jwt'
