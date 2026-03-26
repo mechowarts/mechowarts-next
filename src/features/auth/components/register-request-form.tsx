@@ -20,7 +20,6 @@ import { requestRegisterOTPAction } from '@/server/actions/auth.actions'
 import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { Sparkles } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -84,10 +83,6 @@ export function RegisterRequestForm({
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-emerald-200 bg-emerald-50 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-emerald-700 uppercase">
-          <Sparkles className="size-3.5" />
-          Register
-        </div>
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
             Create your MechoWarts account
@@ -101,7 +96,7 @@ export function RegisterRequestForm({
 
       <Form {...form}>
         <form
-          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 "
+          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6"
           onSubmit={form.handleSubmit((values) => {
             requestOtpMutation.mutate(
               {

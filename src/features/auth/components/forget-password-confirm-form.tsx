@@ -71,10 +71,7 @@ export function ForgetPasswordConfirmForm({
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
-        <div className="inline-flex items-center gap-2 rounded-full border border-amber-200 bg-amber-50 px-3 py-1 text-xs font-semibold tracking-[0.24em] text-amber-700 uppercase">
-          <KeyRound className="size-3.5" />
-          Forgot Password
-        </div>
+        
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
             Verify and set a new password

@@ -96,7 +96,7 @@ export function LoginWithPasswordForm({
         </div>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 ">
+      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6">
         <Button
           type="button"
           variant="ghost"
