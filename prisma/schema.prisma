@@ -8,79 +8,48 @@ datasource db {
 }
 
 model User {
-  id            String   @id
-  name          String
-  email         String   @unique
-  emailVerified Boolean  @default(false)
-  image         String?
-  createdAt     DateTime @default(now())
-  updatedAt     DateTime @updatedAt
+  id        String   @id
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
 
-  rollNumber  Int?    @unique
-  avatarUrl   String?
-  bio         String?
-  bloodGroup  String?
-  homeTown    String?
-  phone       String?
-  facebookUrl String?
-  isPublic    Boolean @default(true)
+  email           String    @unique
+  emailVerifiedAt DateTime?
 
-  sessions     Session[]
-  accounts     Account[]
+  password          String
+  passwordChangedAt DateTime?
+
+  name       String
+  rollNumber Int        @unique
+  visibility Visibility @default(public)
+
+  bio        String?
+  avatar     String?
+  location   String?
+  bloodGroup String?
+
+  phone            String?
+  facebookId       String?
+  instagramId      String?
+  whatsappNumber   String?
+  telegramNumber   String?
+  telegramUsername String?
+
   posts        Post[]            @relation("PostAuthor")
   savedPosts   PostSave[]
   institutions UserInstitution[]
 }
 
-model Session {
-  id        String   @id
-  expiresAt DateTime
-  token     String   @unique
-  createdAt DateTime @default(now())
-  updatedAt DateTime @updatedAt
-  ipAddress String?
-  userAgent String?
-  userId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-}
-
-model Account {
-  id                    String    @id
-  accountId             String
-  providerId            String
-  userId                String
-  user                  User      @relation(fields: [userId], references: [id], onDelete: Cascade)
-  accessToken           String?
-  refreshToken          String?
-  idToken               String?
-  accessTokenExpiresAt  DateTime?
-  refreshTokenExpiresAt DateTime?
-  scope                 String?
-  password              String?
-  createdAt             DateTime  @default(now())
-  updatedAt             DateTime  @updatedAt
-
-  @@unique([providerId, accountId])
-}
-
-model Verification {
-  id         String   @id
-  identifier String
-  value      String
-  expiresAt  DateTime
-  createdAt  DateTime @default(now())
-  updatedAt  DateTime @updatedAt
-}
-
 model Post {
   id        String   @id @default(cuid())
-  authorId  String
-  author    User     @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
-  caption   String
-  location  String?
-  imageUrl  String?
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
+
+  authorId String
+  author   User   @relation("PostAuthor", fields: [authorId], references: [id], onDelete: Cascade)
+
+  caption  String
+  location String?
+  imageUrl String?
 
   saves PostSave[]
 }
@@ -88,9 +57,10 @@ model Post {
 model PostSave {
   userId    String
   postId    String
-  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
-  post      Post     @relation(fields: [postId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
+
+  user User @relation(fields: [userId], references: [id], onDelete: Cascade)
+  post Post @relation(fields: [postId], references: [id], onDelete: Cascade)
 
   @@id([userId, postId])
 }
@@ -107,4 +77,9 @@ model UserInstitution {
 enum InstitutionKind {
   college
   school
+}
+
+enum Visibility {
+  public
+  private
 }
