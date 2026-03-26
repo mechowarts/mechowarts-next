@@ -17,8 +17,8 @@ model User {
   updatedAt     DateTime @updatedAt
 
   rollNumber  Int?    @unique
-  avatarUrl   String  @default("")
-  bio         String  @default("")
+  avatarUrl   String?
+  bio         String?
   bloodGroup  String?
   homeTown    String?
   phone       String?
