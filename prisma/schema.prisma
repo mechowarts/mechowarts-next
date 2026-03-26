@@ -12,12 +12,13 @@ model User {
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 
-  email             String    @unique
+  roll  Int    @unique
+  email String @unique
+
   password          String
   passwordChangedAt DateTime?
 
   name       String
-  rollNumber Int        @unique
   visibility Visibility @default(public)
 
   bio        String?
