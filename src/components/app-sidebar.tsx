@@ -96,7 +96,7 @@ export function AppSidebar() {
             onClick={() => {
               signOutMutation.mutate(undefined, {
                 onSuccess() {
-                  window.location.assign('/all-users')
+                  window.location.assign('/')
                 },
               })
             }}

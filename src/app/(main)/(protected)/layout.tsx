@@ -15,5 +15,5 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
     return null
   }
 
-  return redirect('/all-users', RedirectType.replace)
+  return redirect('/users', RedirectType.replace)
 }

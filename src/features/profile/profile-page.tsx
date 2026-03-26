@@ -83,7 +83,7 @@ export function ProfilePage() {
           <p className="text-muted-foreground mb-4">
             This profile is set to private and cannot be viewed.
           </p>
-          <Button onClick={() => router.push('/all-users')}>
+          <Button onClick={() => router.push('/users')}>
             Back to All Users
           </Button>
         </div>

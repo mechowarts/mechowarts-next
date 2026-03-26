@@ -30,7 +30,7 @@ export const sidebarLinks: NavigationItem[] = [
   },
   {
     icon: UserGroupIcon,
-    route: '/all-users',
+    route: '/users',
     label: 'People',
   },
   {
@@ -66,7 +66,7 @@ export const bottomBarLinks: NavigationItem[] = [
   },
   {
     icon: UserGroupIcon,
-    route: '/all-users',
+    route: '/users',
     label: 'People',
   },
   {
