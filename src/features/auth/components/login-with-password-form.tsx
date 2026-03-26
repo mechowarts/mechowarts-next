@@ -53,6 +53,7 @@ export function LoginWithPasswordForm({
   const signInMutation = useMutation({
     mutationFn: signInAction,
   })
+
   const userQuery = useQuery({
     enabled: Boolean(roll),
     queryFn: async () => {
@@ -129,14 +130,14 @@ export function LoginWithPasswordForm({
                     },
                     {
                       onError(error) {
-                        toast.error(
-                          error instanceof Error
-                            ? error.message
-                            : 'Login failed. Please try again.'
-                        )
+                        form.setError('password', {
+                          message:
+                            error instanceof Error
+                              ? error.message
+                              : 'Login failed. Please try again.',
+                        })
                       },
                       onSuccess() {
-                        toast.success('Logged in successfully.')
                         window.location.assign('/')
                       },
                     }
