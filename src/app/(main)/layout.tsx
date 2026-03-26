@@ -20,14 +20,12 @@ export default function MainLayout({ children }: PropsWithChildren) {
   const pathname = usePathname()
   const status = useAuthStore((store) => store.status)
   const user = useAuthStore((store) => store.user)
-  const isLoading = status === 'loading'
-  const isAuthenticated = status === 'authenticated'
 
   const signOutMutation = useMutation({
     mutationFn: signOutAction,
   })
 
-  if (isLoading) {
+  if (status === 'loading') {
     return (
       <div className="flex h-screen w-full items-center justify-center">
         <Spinner className="size-8" />
@@ -48,7 +46,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
         </div>
 
         <div className="flex items-center gap-4">
-          {isAuthenticated && user ? (
+          {user ? (
             <>
               <Button
                 variant="ghost"
@@ -103,7 +101,7 @@ export default function MainLayout({ children }: PropsWithChildren) {
         {bottomBarLinks.map((link) => {
           const isActive = pathname === link.route
 
-          if (link.isPrivate && !isAuthenticated) {
+          if (link.isPrivate && !user) {
             return null
           }
 
