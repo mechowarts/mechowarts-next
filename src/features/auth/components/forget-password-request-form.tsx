@@ -13,7 +13,6 @@ import { requestResetPasswordOTPAction } from '@/server/actions/auth.actions'
 import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { KeyRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -57,7 +56,6 @@ export function ForgetPasswordRequestForm({
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
-        
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
             Reset your password
@@ -71,7 +69,7 @@ export function ForgetPasswordRequestForm({
 
       <Form {...form}>
         <form
-          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 "
+          className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6"
           onSubmit={form.handleSubmit(({ roll }) => {
             requestOtpMutation.mutate(
               {

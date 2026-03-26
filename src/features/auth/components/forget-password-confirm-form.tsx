@@ -21,7 +21,7 @@ import {
 import { buildStudentEmail } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
 import { useMutation } from '@tanstack/react-query'
-import { ArrowLeft, KeyRound, MailCheck } from 'lucide-react'
+import { ArrowLeft, MailCheck } from 'lucide-react'
 import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
@@ -71,7 +71,6 @@ export function ForgetPasswordConfirmForm({
   return (
     <div className="space-y-6">
       <div className="space-y-3 text-center">
-        
         <div className="space-y-2">
           <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
             Verify and set a new password
@@ -82,7 +81,7 @@ export function ForgetPasswordConfirmForm({
         </div>
       </div>
 
-      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6 ">
+      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6">
         <Button
           type="button"
           variant="ghost"
@@ -95,7 +94,7 @@ export function ForgetPasswordConfirmForm({
 
         <div className="space-y-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
           <div className="flex items-start gap-3 text-left">
-            <div className="rounded-2xl bg-white p-2 text-slate-700  ring-1 ring-slate-200">
+            <div className="rounded-2xl bg-white p-2 text-slate-700 ring-1 ring-slate-200">
               <MailCheck className="size-5" />
             </div>
             <div>
