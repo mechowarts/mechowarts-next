@@ -1,6 +1,7 @@
 import { Button } from '@/components/ui/button'
 import { cn } from '@/lib/utils'
-import type { ProgressiveAuthStep } from '@/types'
+
+type ProgressiveAuthStep = 'login' | 'register' | 'roll'
 
 interface AuthStepperProps {
   currentStepIndex: number

@@ -1,4 +1,3 @@
-import { requestRegisterOtp, verifyRegisterOtp } from '@/api/http/auth'
 import { Button, Loading } from '@/components/ui/button'
 import {
   Form,
@@ -25,13 +24,29 @@ import { Textarea } from '@/components/ui/textarea'
 import { bloodGroups } from '@/constants/profile'
 import { AuthStageTiles } from '@/features/auth/auth-stage-tiles'
 import { PasswordField } from '@/features/auth/password-field'
-import type { RegisterData } from '@/types'
+import {
+  requestRegisterOtp,
+  verifyRegisterOtpAction,
+} from '@/server/actions/auth.actions'
 import { buildStudentEmail } from '@/utils/roll'
 import { useMutation } from '@tanstack/react-query'
 import { MailCheck, ShieldCheck } from 'lucide-react'
 import { useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+
+type RegisterData = {
+  bio: string
+  bloodGroup: string
+  confirmPassword: string
+  facebookUrl: string
+  firstName: string
+  homeTown: string
+  lastName: string
+  otp: string
+  password: string
+  phone: string
+}
 
 interface ProgressiveRegisterStepProps {
   isBusy: boolean
@@ -73,7 +88,7 @@ export function ProgressiveRegisterStep({
     mutationFn: requestRegisterOtp,
   })
   const verifyOtpMutation = useMutation({
-    mutationFn: verifyRegisterOtp,
+    mutationFn: verifyRegisterOtpAction,
   })
   const currentStageIndex = registerStages.findIndex(({ id }) => id === stage)
   const otpValue = form.watch('otp')

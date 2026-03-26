@@ -1,5 +1,5 @@
-import { getUserByRoll } from '@/api/http/users'
 import { RollInput } from '@/features/auth/roll-input'
+import { getUserByRoll } from '@/server/actions/users.actions'
 import { useRouter } from 'next/navigation'
 import { useState } from 'react'
 import { toast } from 'sonner'

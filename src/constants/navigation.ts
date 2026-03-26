@@ -1,4 +1,3 @@
-import type { NavigationItem } from '@/types'
 import {
   Bookmark01Icon,
   Home01Icon,
@@ -7,6 +6,14 @@ import {
   ToolsIcon,
   UserGroupIcon,
 } from '@hugeicons/core-free-icons'
+import { IconSvgElement } from '@hugeicons/react'
+
+interface NavigationItem {
+  icon: IconSvgElement
+  route: string
+  label: string
+  isPrivate?: boolean
+}
 
 export const sidebarLinks: NavigationItem[] = [
   {

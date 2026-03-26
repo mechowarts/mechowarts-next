@@ -1,6 +1,4 @@
 import { serverEnv } from '@/env.server'
-import { ApiError } from '@/server/http'
-import type { RegisterOtpPayload, ResetPasswordOtpPayload } from '@/types'
 import { buildStudentEmail } from '@/utils/roll'
 import OneTimeJwt from 'one-time-jwt'
 
@@ -38,7 +36,7 @@ export async function createRegisterOtp(rollNumber: number) {
       email,
       requestedAt: new Date().toISOString(),
       rollNumber,
-    } satisfies RegisterOtpPayload,
+    },
     {
       expiresIn: '10m',
       otpLength: 6,
@@ -55,19 +53,16 @@ export async function createRegisterOtp(rollNumber: number) {
 
 export async function verifyRegisterOtp(tokens: string[], otp: string) {
   try {
-    return await registerOtpJwt.verifyToken<RegisterOtpPayload>(
-      'register',
-      tokens,
-      {
-        maxTokenLimitPerPurpose: authOtpTokenLimit,
-        otp,
-      }
-    )
+    return await registerOtpJwt.verifyToken<{
+      email: string
+      requestedAt: string
+      rollNumber: number
+    }>('register', tokens, {
+      maxTokenLimitPerPurpose: authOtpTokenLimit,
+      otp,
+    })
   } catch (error) {
-    throw new ApiError(
-      400,
-      getOtpErrorMessage(error, 'Invalid registration code.')
-    )
+    throw new Error(getOtpErrorMessage(error, 'Invalid registration code.'))
   }
 }
 
@@ -85,7 +80,7 @@ export async function createResetPasswordOtp(data: {
       requestedAt: new Date().toISOString(),
       rollNumber: data.rollNumber,
       userId: data.userId,
-    } satisfies ResetPasswordOtpPayload,
+    },
     {
       expiresIn: '10m',
       otpLength: 6,
@@ -102,18 +97,17 @@ export async function createResetPasswordOtp(data: {
 
 export async function verifyResetPasswordOtp(tokens: string[], otp: string) {
   try {
-    return await resetPasswordOtpJwt.verifyToken<ResetPasswordOtpPayload>(
-      'reset-password',
-      tokens,
-      {
-        maxTokenLimitPerPurpose: authOtpTokenLimit,
-        otp,
-      }
-    )
+    return await resetPasswordOtpJwt.verifyToken<{
+      accountUpdatedAt: string
+      email: string
+      requestedAt: string
+      rollNumber: number
+      userId: string
+    }>('reset-password', tokens, {
+      maxTokenLimitPerPurpose: authOtpTokenLimit,
+      otp,
+    })
   } catch (error) {
-    throw new ApiError(
-      400,
-      getOtpErrorMessage(error, 'Invalid password reset code.')
-    )
+    throw new Error(getOtpErrorMessage(error, 'Invalid password reset code.'))
   }
 }

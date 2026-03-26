@@ -1,4 +1,3 @@
-import { createPostDocument } from '@/api/http/posts'
 import {
   BetterDialog,
   BetterDialogContent,
@@ -13,6 +12,7 @@ import {
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
 import { Textarea } from '@/components/ui/textarea'
+import { createPost } from '@/server/actions/posts.actions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { useEffect } from 'react'
 import { useForm } from 'react-hook-form'
@@ -32,7 +32,7 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
     },
   })
   const createPostMutation = useMutation({
-    mutationFn: createPostDocument,
+    mutationFn: createPost,
     async onSuccess() {
       await queryClient.invalidateQueries({ queryKey: ['posts'] })
     },

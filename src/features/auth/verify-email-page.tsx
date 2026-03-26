@@ -1,6 +1,6 @@
-import { getUserByRoll } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
+import { getUserByRoll } from '@/server/actions/users.actions'
 import { useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'

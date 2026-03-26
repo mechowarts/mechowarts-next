@@ -1,8 +1,8 @@
 import { signInAccount } from '@/api/http/auth'
-import { getUserByRoll } from '@/api/http/users'
 import { Spinner } from '@/components/ui/spinner'
 import { AuthUserPreview } from '@/features/auth/auth-user-preview'
 import { LoginForm } from '@/features/auth/login-form'
+import { getUserByRoll } from '@/server/actions/users.actions'
 import { useMutation, useQuery } from '@tanstack/react-query'
 import { useParams, useRouter } from 'next/navigation'
 import { useEffect } from 'react'
@@ -38,7 +38,7 @@ export function LoginPage() {
   return (
     <>
       <AuthUserPreview
-        avatarUrl={userQuery.data.avatarUrl}
+        avatarUrl={userQuery.data.avatarUrl ?? undefined}
         name={userQuery.data.name}
       />
 

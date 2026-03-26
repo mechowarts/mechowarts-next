@@ -1,34 +1,35 @@
 import { useAuth } from '@/hooks/use-auth'
-import type { Institution, User } from '@/types'
 
-export function ensureInstitutions(value: Institution[] | undefined) {
-  return Array.isArray(value) ? value : []
+function readInstitutions(
+  institutions:
+    | Array<{
+        kind: 'college' | 'school'
+        location: null | string
+        name: string
+      }>
+    | undefined,
+  kind: 'college' | 'school'
+) {
+  return (institutions ?? [])
+    .filter((institution) => institution.kind === kind)
+    .map((institution) => ({
+      name: institution.name,
+      location: institution.location ?? '',
+    }))
 }
 
-export function readInstitutions(value: unknown) {
-  if (!Array.isArray(value)) {
-    return []
+function getUserInstitutions(
+  user: NonNullable<ReturnType<typeof useAuth>['user']>
+) {
+  if (!('institutions' in user) || !Array.isArray(user.institutions)) {
+    return undefined
   }
 
-  return value.flatMap((item) => {
-    if (!item || typeof item !== 'object' || !('name' in item)) {
-      return []
-    }
-
-    if (typeof item.name !== 'string') {
-      return []
-    }
-
-    return [
-      {
-        name: item.name,
-        location:
-          'location' in item && typeof item.location === 'string'
-            ? item.location
-            : undefined,
-      },
-    ]
-  })
+  return user.institutions as Array<{
+    kind: 'college' | 'school'
+    location: null | string
+    name: string
+  }>
 }
 
 export function revokeObjectUrl(value: null | string) {
@@ -50,15 +51,11 @@ export function createProfileState(
     isPublic: user.isPublic ?? true,
     bloodGroup: user.bloodGroup ?? '',
     homeTown: user.homeTown ?? '',
-    colleges: ensureInstitutions(
-      'colleges' in user ? readInstitutions(user.colleges) : undefined
-    ),
-    schools: ensureInstitutions(
-      'schools' in user ? readInstitutions(user.schools) : undefined
-    ),
+    colleges: readInstitutions(getUserInstitutions(user), 'college'),
+    schools: readInstitutions(getUserInstitutions(user), 'school'),
     avatarUrl: user.avatarUrl ?? '',
     phone: user.phone ?? '',
     facebookUrl: user.facebookUrl ?? '',
     rollNumber: user.rollNumber ?? undefined,
-  } satisfies User
+  }
 }

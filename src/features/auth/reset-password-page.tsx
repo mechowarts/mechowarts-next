@@ -1,8 +1,3 @@
-import {
-  requestResetPasswordOtp,
-  resetPassword,
-  verifyResetPasswordOtp,
-} from '@/api/http/auth'
 import { Button, Loading } from '@/components/ui/button'
 import {
   Form,
@@ -20,6 +15,11 @@ import {
 } from '@/components/ui/input-otp'
 import { AuthStageTiles } from '@/features/auth/auth-stage-tiles'
 import { PasswordField } from '@/features/auth/password-field'
+import {
+  requestResetPasswordOtp,
+  resetPassword,
+  verifyResetPasswordOtpAction,
+} from '@/server/actions/auth.actions'
 import { buildStudentEmail } from '@/utils/roll'
 import { useMutation } from '@tanstack/react-query'
 import { KeyRound, MailCheck, ShieldCheck } from 'lucide-react'
@@ -58,7 +58,7 @@ export function ResetPasswordPage() {
     mutationFn: requestResetPasswordOtp,
   })
   const verifyOtpMutation = useMutation({
-    mutationFn: verifyResetPasswordOtp,
+    mutationFn: verifyResetPasswordOtpAction,
   })
   const resetPasswordMutation = useMutation({
     mutationFn: resetPassword,

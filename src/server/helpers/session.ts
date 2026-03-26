@@ -1,5 +1,4 @@
-import { auth } from '@/lib/auth'
-import { ApiError } from '@/server/http'
+import { auth } from '@/server/lib/auth'
 import { headers } from 'next/headers'
 
 export async function getSession() {
@@ -10,7 +9,7 @@ export async function requireSession() {
   const session = await getSession()
 
   if (!session) {
-    throw new ApiError(401, 'Unauthorized.')
+    throw new Error('Unauthorized.')
   }
 
   return session

@@ -1,4 +1,3 @@
-import { getAllUsers } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -10,6 +9,7 @@ import {
 } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
 import { useAuth } from '@/hooks/use-auth'
+import { listUsers } from '@/server/actions/users.actions'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -27,7 +27,7 @@ export function AllUsersPage() {
       : undefined
   const allUsersQuery = useQuery({
     queryKey: ['users'],
-    queryFn: getAllUsers,
+    queryFn: listUsers,
   })
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)

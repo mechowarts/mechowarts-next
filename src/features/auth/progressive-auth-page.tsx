@@ -1,16 +1,18 @@
-import { registerWithOtp, signInAccount } from '@/api/http/auth'
-import { getUserByRoll } from '@/api/http/users'
+import { signInAccount } from '@/api/http/auth'
 import { Button } from '@/components/ui/button'
 import { AuthStepper } from '@/features/auth/auth-stepper'
 import { AuthUserPreview } from '@/features/auth/auth-user-preview'
 import { LoginForm } from '@/features/auth/login-form'
 import { ProgressiveRegisterStep } from '@/features/auth/progressive-register-step'
 import { RollInput } from '@/features/auth/roll-input'
-import type { ProgressiveAuthStep } from '@/types'
+import { registerWithOtp } from '@/server/actions/auth.actions'
+import { getUserByRoll } from '@/server/actions/users.actions'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
 import { toast } from 'sonner'
+
+type ProgressiveAuthStep = 'login' | 'register' | 'roll'
 
 function getStepFromSearchParams(
   searchParams: URLSearchParams
@@ -57,7 +59,7 @@ export function ProgressiveAuthPage() {
 
         if (user) {
           setPreviewName(user.name)
-          setPreviewAvatarUrl(user.avatarUrl)
+          setPreviewAvatarUrl(user.avatarUrl ?? '')
           setStep('login')
           setStepHistory(['roll', 'login'])
           return
@@ -119,7 +121,7 @@ export function ProgressiveAuthPage() {
 
                 if (user) {
                   setPreviewName(user.name)
-                  setPreviewAvatarUrl(user.avatarUrl)
+                  setPreviewAvatarUrl(user.avatarUrl ?? '')
                   setStep('login')
                   setStepHistory(['roll', 'login'])
                   return

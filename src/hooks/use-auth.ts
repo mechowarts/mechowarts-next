@@ -1,4 +1,4 @@
-import type { auth } from '@/lib/auth'
+import type { auth } from '@/server/lib/auth'
 import { authClient } from '@/lib/auth-client'
 import type { Prettify } from 'daily-code'
 

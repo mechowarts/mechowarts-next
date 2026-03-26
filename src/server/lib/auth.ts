@@ -1,7 +1,7 @@
 import { rollNumberPattern, studentEmailDomain } from '@/constants/auth'
 import { serverEnv } from '@/env.server'
-import { hashPassword, verifyPassword } from '@/lib/password'
-import { prisma } from '@/lib/prisma'
+import { hashPassword, verifyPassword } from '@/server/lib/password'
+import { prisma } from '@/server/lib/prisma'
 import { prismaAdapter } from '@better-auth/prisma-adapter'
 import { betterAuth } from 'better-auth'
 

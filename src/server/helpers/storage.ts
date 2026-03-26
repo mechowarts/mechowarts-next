@@ -1,5 +1,4 @@
 import { serverEnv } from '@/env.server'
-import { ApiError } from '@/server/http'
 import { PutObjectCommand, S3Client } from '@aws-sdk/client-s3'
 
 let storageClient: null | S3Client = null
@@ -68,7 +67,7 @@ async function uploadFile(file: File, keyPrefix: string, userId: string) {
       publicUrl: serverEnv.R2_PUBLIC_URL,
       userId,
     })
-    throw new ApiError(500, 'Failed to upload file to R2.')
+    throw new Error('Failed to upload file to R2.')
   }
 
   return `${serverEnv.R2_PUBLIC_URL}/${key}`

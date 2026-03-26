@@ -17,9 +17,20 @@ import {
 } from '@/components/ui/select'
 import { Textarea } from '@/components/ui/textarea'
 import { bloodGroups } from '@/constants/profile'
-import type { ProfileData } from '@/types'
 import { useFieldArray, useForm } from 'react-hook-form'
 import PhoneInput from 'react-phone-input-2'
+
+type ProfileData = {
+  bio: string
+  bloodGroup: string
+  colleges: Array<{ location?: string; name: string }>
+  facebook?: string
+  homeTown: string
+  name: string
+  schools: Array<{ location?: string; name: string }>
+  whatsapp?: string
+  whatsappCountry?: string
+}
 
 interface ProgressiveProfileStepProps {
   isLoading: boolean

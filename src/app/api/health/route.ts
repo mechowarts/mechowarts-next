@@ -1,5 +1,5 @@
-import { prisma } from '@/lib/prisma'
-import { fail, ok } from '@/server/http'
+import { prisma } from '@/server/lib/prisma'
+import { NextResponse } from 'next/server'
 
 export async function GET() {
   try {
@@ -11,7 +11,7 @@ export async function GET() {
       isDatabaseHealthy = false
     }
 
-    return ok({
+    return NextResponse.json({
       status: isDatabaseHealthy ? 'healthy' : 'degraded',
       timestamp: new Date().toISOString(),
       checks: {
@@ -19,6 +19,12 @@ export async function GET() {
       },
     })
   } catch (error) {
-    return fail(error)
+    return NextResponse.json(
+      {
+        message:
+          error instanceof Error ? error.message : 'Health check failed.',
+      },
+      { status: 500 }
+    )
   }
 }

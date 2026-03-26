@@ -1,8 +1,8 @@
-import { getUserByRoll } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
 import { useAuth } from '@/hooks/use-auth'
+import { getUserByRoll } from '@/server/actions/users.actions'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -32,6 +32,12 @@ export function ProfilePage() {
     queryFn: () => getUserByRoll(id),
     enabled: Boolean(id),
   })
+  const colleges = (profileQuery.data?.institutions ?? []).filter(
+    (institution) => institution.kind === 'college'
+  )
+  const schools = (profileQuery.data?.institutions ?? []).filter(
+    (institution) => institution.kind === 'school'
+  )
   const [activeTab, setActiveTab] = useState<'info' | 'posts'>('info')
   const isOwnProfile = id === String(currentUserRollNumber)
 
@@ -175,8 +181,7 @@ export function ProfilePage() {
                     </div>
                   ) : null}
 
-                  {profileQuery.data.colleges &&
-                  profileQuery.data.colleges.length > 0 ? (
+                  {colleges.length > 0 ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaBuildingColumns className="text-primary mr-1 inline-block" />{' '}
@@ -184,19 +189,16 @@ export function ProfilePage() {
                       </span>
 
                       <ul className="ml-4 list-disc">
-                        {profileQuery.data.colleges
-                          .filter(Boolean)
-                          .map((college, index) => (
-                            <li key={`college-${index}`}>
-                              {college.name || 'Unnamed College'}
-                            </li>
-                          ))}
+                        {colleges.map((college, index) => (
+                          <li key={`college-${index}`}>
+                            {college.name || 'Unnamed College'}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   ) : null}
 
-                  {profileQuery.data.schools &&
-                  profileQuery.data.schools.length > 0 ? (
+                  {schools.length > 0 ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaSchool className="text-primary mr-1 inline-block" />{' '}
@@ -204,13 +206,11 @@ export function ProfilePage() {
                       </span>
 
                       <ul className="ml-4 list-disc">
-                        {profileQuery.data.schools
-                          .filter(Boolean)
-                          .map((school, index) => (
-                            <li key={`school-${index}`}>
-                              {school.name || 'Unnamed School'}
-                            </li>
-                          ))}
+                        {schools.map((school, index) => (
+                          <li key={`school-${index}`}>
+                            {school.name || 'Unnamed School'}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   ) : null}

@@ -2,26 +2,38 @@
 
 import 'server-only'
 
-import { prisma } from '@/lib/prisma'
-import { requireSession } from '../session'
-import { uploadAvatar } from '../storage'
+import { prisma } from '@/server/lib/prisma'
+import { requireSession } from '../helpers/session'
+import { uploadAvatar } from '../helpers/storage'
 
 export async function changeUserAvatar(input: File) {
   const session = await requireSession()
 
+  if (!input.type.startsWith('image/')) {
+    throw new Error('Please upload an image file.')
+  }
+
+  if (input.size > 5 * 1024 * 1024) {
+    throw new Error('Avatar image must be 5 MB or smaller.')
+  }
+
   const result = await uploadAvatar(input, session.user.id)
 
-  return await prisma.user.update({
+  await prisma.user.update({
     where: { id: session.user.id },
     data: { avatarUrl: result },
   })
+
+  return { avatarUrl: result }
 }
 
 export async function removeUserAvatar() {
   const session = await requireSession()
 
-  return prisma.user.update({
+  await prisma.user.update({
     where: { id: session.user.id },
     data: { avatarUrl: null },
   })
+
+  return { avatarUrl: '' }
 }

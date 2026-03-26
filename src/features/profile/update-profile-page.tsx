@@ -1,4 +1,3 @@
-import { updateUserProfile, uploadAvatarFile } from '@/api/http/users'
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
 import { Button, Loading } from '@/components/ui/button'
 import { Checkbox } from '@/components/ui/checkbox'
@@ -34,7 +33,7 @@ import {
 } from '@/features/profile/profile-form-utils'
 import { useAuth } from '@/hooks/use-auth'
 import { changeUserAvatar } from '@/server/actions/avatar.actions'
-import type { User } from '@/types'
+import { updateUserProfile } from '@/server/actions/users.actions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { openFileExplorer } from 'daily-code/browser'
 import { useRouter } from 'next/navigation'
@@ -42,6 +41,8 @@ import { useEffect, useRef, useState } from 'react'
 import type { Control, FieldArrayWithId } from 'react-hook-form'
 import { useFieldArray, useForm } from 'react-hook-form'
 import { toast } from 'sonner'
+
+type ProfileFormValues = ReturnType<typeof createProfileState>
 
 function InstitutionFieldArray({
   addLabel,
@@ -55,9 +56,9 @@ function InstitutionFieldArray({
   placeholder,
 }: {
   addLabel: string
-  control: Control<User>
+  control: Control<ProfileFormValues>
   disabled: boolean
-  fields: FieldArrayWithId<User, 'colleges' | 'schools', 'id'>[]
+  fields: FieldArrayWithId<ProfileFormValues, 'colleges' | 'schools', 'id'>[]
   label: string
   name: 'colleges' | 'schools'
   onAppend: () => void
@@ -130,24 +131,48 @@ function UpdateProfileForm({
 }) {
   const router = useRouter()
   const queryClient = useQueryClient()
-  const form = useForm<User>({ defaultValues: createProfileState(user) })
+  const form = useForm<ProfileFormValues>({
+    defaultValues: createProfileState(user),
+  })
   const avatarUrl = form.watch('avatarUrl')
   const [avatarPreview, setAvatarPreview] = useState(user.avatarUrl ?? '')
   const avatarObjectUrlRef = useRef<null | string>(null)
   const colleges = useFieldArray({ control: form.control, name: 'colleges' })
   const schools = useFieldArray({ control: form.control, name: 'schools' })
   const updateProfileMutation = useMutation({
-    mutationFn: updateUserProfile,
-    async onSuccess(_, user) {
+    mutationFn: (profile: ProfileFormValues) =>
+      updateUserProfile(user.id, {
+        avatarUrl: profile.avatarUrl,
+        bio: profile.bio,
+        bloodGroup: profile.bloodGroup,
+        facebookUrl: profile.facebookUrl,
+        homeTown: profile.homeTown,
+        institutions: [
+          ...profile.colleges.map((institution) => ({
+            kind: 'college' as const,
+            name: institution.name,
+            location: institution.location || undefined,
+          })),
+          ...profile.schools.map((institution) => ({
+            kind: 'school' as const,
+            name: institution.name,
+            location: institution.location || undefined,
+          })),
+        ],
+        isPublic: profile.isPublic,
+        name: profile.name,
+        phone: profile.phone,
+      }),
+    async onSuccess(_, profile) {
       await queryClient.invalidateQueries({ queryKey: ['users'] })
       await queryClient.invalidateQueries({
-        queryKey: ['profile', String(user.rollNumber)],
+        queryKey: ['profile', String(profile.rollNumber)],
       })
       await refetchAuth()
     },
   })
   const uploadAvatarMutation = useMutation({
-    mutationFn: (file: File) => uploadAvatarFile(file),
+    mutationFn: changeUserAvatar,
   })
   const isSubmitting =
     updateProfileMutation.isPending || uploadAvatarMutation.isPending
@@ -246,8 +271,6 @@ function UpdateProfileForm({
                               return
                             }
 
-                            await changeUserAvatar(file)
-
                             const previousAvatarUrl =
                               form.getValues('avatarUrl')
                             const objectUrl = URL.createObjectURL(file)
@@ -257,14 +280,15 @@ function UpdateProfileForm({
                             setAvatarPreview(objectUrl)
 
                             uploadAvatarMutation.mutate(file, {
-                              onSuccess({ url }) {
+                              onSuccess(updatedUser) {
                                 revokeObjectUrl(avatarObjectUrlRef.current)
                                 avatarObjectUrlRef.current = null
-                                setAvatarPreview(url)
-                                form.setValue('avatarUrl', url)
-                                toast.success(
-                                  'Avatar uploaded. Save changes to update your profile.'
+                                setAvatarPreview(updatedUser.avatarUrl)
+                                form.setValue(
+                                  'avatarUrl',
+                                  updatedUser.avatarUrl
                                 )
+                                toast.success('Avatar updated successfully!')
                               },
                               onError(error) {
                                 revokeObjectUrl(avatarObjectUrlRef.current)
@@ -426,7 +450,7 @@ function UpdateProfileForm({
                   fields={colleges.fields}
                   label="Colleges"
                   name="colleges"
-                  onAppend={() => colleges.append({ name: '' })}
+                  onAppend={() => colleges.append({ location: '', name: '' })}
                   onRemove={(index) => colleges.remove(index)}
                   placeholder="College name"
                 />
@@ -437,7 +461,7 @@ function UpdateProfileForm({
                   fields={schools.fields}
                   label="Schools"
                   name="schools"
-                  onAppend={() => schools.append({ name: '' })}
+                  onAppend={() => schools.append({ location: '', name: '' })}
                   onRemove={(index) => schools.remove(index)}
                   placeholder="School name"
                 />
