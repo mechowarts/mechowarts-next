@@ -7,7 +7,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import {
   InputOTP,
   InputOTPGroup,
@@ -28,6 +27,7 @@ import { useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { PasswordInput } from './password-input'
 
 const resetSchema = z
   .object({
@@ -173,9 +173,8 @@ export function ForgetPasswordConfirmForm({
                 <FormItem>
                   <FormLabel>New Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Enter new password"
                       disabled={isBusy}
@@ -193,9 +192,8 @@ export function ForgetPasswordConfirmForm({
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Repeat password"
                       disabled={isBusy}

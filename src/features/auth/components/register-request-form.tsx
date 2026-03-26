@@ -18,6 +18,7 @@ import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { PasswordInput } from './password-input'
 import { RollNumberInput } from './roll-number-input'
 
 const registerDetailsSchema = z
@@ -206,9 +207,8 @@ export function RegisterRequestForm({
                 <FormItem>
                   <FormLabel>Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Create a password"
                       disabled={requestOtpMutation.isPending}
@@ -226,9 +226,8 @@ export function RegisterRequestForm({
                 <FormItem>
                   <FormLabel>Confirm Password</FormLabel>
                   <FormControl>
-                    <Input
+                    <PasswordInput
                       {...field}
-                      type="password"
                       autoComplete="new-password"
                       placeholder="Repeat the password"
                       disabled={requestOtpMutation.isPending}

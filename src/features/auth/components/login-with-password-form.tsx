@@ -8,7 +8,6 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
-import { Input } from '@/components/ui/input'
 import { Spinner } from '@/components/ui/spinner'
 import { signInAction } from '@/server/actions/auth.actions'
 import { getUserByRoll } from '@/server/actions/users.actions'
@@ -21,6 +20,7 @@ import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
 import { toast } from 'sonner'
 import { z } from 'zod'
+import { PasswordInput } from './password-input'
 
 const passwordSchema = z.object({
   password: z.string().min(6, 'Password must be at least 6 characters long.'),
@@ -150,9 +150,8 @@ export function LoginWithPasswordForm({
                   <FormItem>
                     <FormLabel>Password</FormLabel>
                     <FormControl>
-                      <Input
+                      <PasswordInput
                         {...field}
-                        type="password"
                         autoComplete="current-password"
                         placeholder="Enter your password"
                         disabled={signInMutation.isPending}
