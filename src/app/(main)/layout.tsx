@@ -5,9 +5,9 @@ import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { bottomBarLinks } from '@/constants/navigation'
-import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { signOutAction } from '@/server/actions/auth.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation } from '@tanstack/react-query'
@@ -18,9 +18,11 @@ import { PropsWithChildren } from 'react'
 export default function MainLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, state } = useAuth()
-  const isLoading = state === 'loading'
-  const isAuthenticated = state === 'authenticated'
+  const status = useAuthStore((store) => store.status)
+  const user = useAuthStore((store) => store.user)
+  const isLoading = status === 'loading'
+  const isAuthenticated = status === 'authenticated'
+
   const signOutMutation = useMutation({
     mutationFn: signOutAction,
   })
@@ -61,9 +63,9 @@ export default function MainLayout({ children }: PropsWithChildren) {
                 <HugeiconsIcon icon={Logout01Icon} className="h-5 w-5" />
               </Button>
 
-              {typeof user.rollNumber === 'number' ? (
+              {typeof user.roll === 'number' ? (
                 <Link
-                  href={`/profile/${user.rollNumber}`}
+                  href={`/profile/${user.roll}`}
                   className="flex items-center gap-3"
                 >
                   <img

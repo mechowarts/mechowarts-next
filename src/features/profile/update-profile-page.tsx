@@ -23,9 +23,9 @@ import {
   createProfileState,
   revokeObjectUrl,
 } from '@/features/profile/profile-form-utils'
-import { useAuth } from '@/hooks/use-auth'
 import { changeUserAvatar } from '@/server/actions/avatar.actions'
 import { updateUserProfile } from '@/server/actions/users.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
 import { openFileExplorer } from 'daily-code/browser'
 import { useRouter } from 'next/navigation'
@@ -50,12 +50,13 @@ type ProfileFormValues = {
   visibility: 'private' | 'public'
   name: string
   phone: string
-  rollNumber: number | undefined
+  roll: number | undefined
   schools: InstitutionFormValue[]
 }
 
 export function UpdateProfilePage() {
-  const { refetch, user } = useAuth()
+  const refetch = useAuthStore((store) => store.refetch)
+  const user = useAuthStore((store) => store.user)
 
   if (!user) {
     throw new Error(
@@ -100,7 +101,7 @@ export function UpdateProfilePage() {
     async onSuccess(_, profile) {
       await queryClient.invalidateQueries({ queryKey: ['users'] })
       await queryClient.invalidateQueries({
-        queryKey: ['profile', String(profile.rollNumber)],
+        queryKey: ['profile', String(profile.roll)],
       })
       await refetch()
     },
@@ -141,7 +142,7 @@ export function UpdateProfilePage() {
                 updateProfileMutation.mutate(profile, {
                   onSuccess() {
                     toast.success('Profile updated successfully!')
-                    router.push(`/profile/${user.rollNumber}`)
+                    router.push(`/profile/${user.roll}`)
                   },
                   onError(error) {
                     toast.error(
@@ -485,7 +486,7 @@ export function UpdateProfilePage() {
                 <Button
                   type="button"
                   variant="outline"
-                  onClick={() => router.push(`/profile/${user.rollNumber}`)}
+                  onClick={() => router.push(`/profile/${user.roll}`)}
                 >
                   Cancel
                 </Button>

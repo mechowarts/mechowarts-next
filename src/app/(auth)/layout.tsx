@@ -3,8 +3,8 @@
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
+import { useAuthStore } from '@/store/use-auth-store'
 import { KeyRound, ShieldCheck } from 'lucide-react'
 import Link from 'next/link'
 import { usePathname, useRouter } from 'next/navigation'
@@ -28,9 +28,9 @@ const authLinks = [
 export default function AuthenticationLayout({ children }: PropsWithChildren) {
   const pathname = usePathname()
   const router = useRouter()
-  const { state } = useAuth()
-  const isLoading = state === 'loading'
-  const isAuthenticated = state === 'authenticated'
+  const status = useAuthStore((store) => store.status)
+  const isLoading = status === 'loading'
+  const isAuthenticated = status === 'authenticated'
   const isResetPage = pathname === '/reset-password'
 
   useEffect(() => {

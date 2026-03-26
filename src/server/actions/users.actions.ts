@@ -52,19 +52,18 @@ export async function listUsers() {
 
   return users.map((user) => ({
     ...user,
-    rollNumber: user.roll,
   }))
 }
 
 export async function getUserByRoll(roll: string) {
-  const rollNumber = Number.parseInt(roll, 10)
+  const parsedRoll = Number.parseInt(roll, 10)
 
-  if (!Number.isInteger(rollNumber) || rollNumber <= 0) {
+  if (!Number.isInteger(parsedRoll) || parsedRoll <= 0) {
     throw new Error('Invalid roll number.')
   }
 
   const user = await prisma.user.findUnique({
-    where: { roll: rollNumber },
+    where: { roll: parsedRoll },
     select: {
       id: true,
       name: true,
@@ -94,7 +93,6 @@ export async function getUserByRoll(roll: string) {
 
   return {
     ...user,
-    rollNumber: user.roll,
   }
 }
 
@@ -170,6 +168,5 @@ export async function updateUserProfile(
 
   return {
     ...user,
-    rollNumber: user.roll,
   }
 }

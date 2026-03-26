@@ -9,7 +9,11 @@ import {
   verifyRegisterOtp,
   verifyResetPasswordOtp,
 } from '@/server/helpers/auth-otp'
-import { setSessionCookie } from '@/server/helpers/session'
+import {
+  clearSessionCookie,
+  getAuthUser,
+  setSessionCookie,
+} from '@/server/helpers/session'
 import { sendOtpEmail } from '@/server/lib/mailer'
 import { hashPassword, verifyPassword } from '@/server/lib/password'
 import { prisma } from '@/server/lib/prisma'
@@ -74,6 +78,15 @@ const signInSchema = z.object({
   password: z.string().min(1),
   rollNumber: z.number().int().positive(),
 })
+
+export async function getSessionAction() {
+  return getAuthUser()
+}
+
+export async function signOutAction() {
+  await clearSessionCookie()
+  return { success: true }
+}
 
 export async function signInAction(input: z.infer<typeof signInSchema>) {
   const body = signInSchema.parse(input)

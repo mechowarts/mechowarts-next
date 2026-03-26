@@ -1,14 +1,15 @@
 import { Spinner } from '@/components/ui/spinner'
 import { CreatePostModal } from '@/features/posts/create-post-modal'
-import { useAuth } from '@/hooks/use-auth'
 import { listPosts } from '@/server/actions/posts.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { AddSquareIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 export function HomePage() {
-  const { user } = useAuth()
+  const user = useAuthStore((store) => store.user)
+
   const avatarUrl =
     user && 'avatar' in user && typeof user.avatar === 'string'
       ? user.avatar

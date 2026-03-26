@@ -1,8 +1,8 @@
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuth } from '@/hooks/use-auth'
 import { getUserByRoll } from '@/server/actions/users.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -36,10 +36,11 @@ export function ProfilePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const id = typeof params.id === 'string' ? params.id : ''
-  const { user } = useAuth()
-  const currentUserRollNumber =
-    user && 'rollNumber' in user && typeof user.rollNumber === 'number'
-      ? user.rollNumber
+  const user = useAuthStore((store) => store.user)
+
+  const currentUserRoll =
+    user && 'roll' in user && typeof user.roll === 'number'
+      ? user.roll
       : undefined
   const profileQuery = useQuery({
     queryKey: ['profile', id],
@@ -53,7 +54,7 @@ export function ProfilePage() {
     (institution) => institution.kind === 'school'
   )
   const [activeTab, setActiveTab] = useState<'info' | 'posts'>('info')
-  const isOwnProfile = id === String(currentUserRollNumber)
+  const isOwnProfile = id === String(currentUserRoll)
 
   if (profileQuery.isLoading) {
     return (

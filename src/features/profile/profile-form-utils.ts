@@ -1,4 +1,4 @@
-import { useAuth } from '@/hooks/use-auth'
+import type { AuthUser } from '@/server/helpers/session'
 
 function readInstitutions(
   institutions:
@@ -18,9 +18,7 @@ function readInstitutions(
     }))
 }
 
-function getUserInstitutions(
-  user: NonNullable<ReturnType<typeof useAuth>['user']>
-) {
+function getUserInstitutions(user: AuthUser) {
   if (!('institutions' in user) || !Array.isArray(user.institutions)) {
     return undefined
   }
@@ -40,9 +38,7 @@ export function revokeObjectUrl(value: null | string) {
   URL.revokeObjectURL(value)
 }
 
-export function createProfileState(
-  user: NonNullable<ReturnType<typeof useAuth>['user']>
-) {
+export function createProfileState(user: AuthUser) {
   return {
     id: user.id,
     name: user.name,
@@ -56,6 +52,6 @@ export function createProfileState(
     avatar: user.avatar ?? '',
     phone: user.phone ?? '',
     facebookId: user.facebookId ?? '',
-    rollNumber: user.rollNumber ?? undefined,
+    roll: user.roll ?? undefined,
   }
 }

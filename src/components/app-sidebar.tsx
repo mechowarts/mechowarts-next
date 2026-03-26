@@ -3,9 +3,9 @@
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { sidebarLinks } from '@/constants/navigation'
-import { useAuth } from '@/hooks/use-auth'
 import { cn } from '@/lib/utils'
 import { signOutAction } from '@/server/actions/auth.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { Logout01Icon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation } from '@tanstack/react-query'
@@ -16,8 +16,10 @@ import { FaSignInAlt } from 'react-icons/fa'
 export function AppSidebar() {
   const router = useRouter()
   const pathname = usePathname()
-  const { user, state } = useAuth()
-  const isAuthenticated = state === 'authenticated'
+  const status = useAuthStore((store) => store.status)
+  const user = useAuthStore((store) => store.user)
+  const isAuthenticated = status === 'authenticated'
+
   const signOutMutation = useMutation({
     mutationFn: signOutAction,
   })
@@ -32,9 +34,9 @@ export function AppSidebar() {
           <Logo className="h-8 w-36" />
         </Link>
 
-        {isAuthenticated && user && typeof user.rollNumber === 'number' ? (
+        {isAuthenticated && user && typeof user.roll === 'number' ? (
           <Link
-            href={`/profile/${user.rollNumber}`}
+            href={`/profile/${user.roll}`}
             className="flex items-center gap-3"
           >
             <img
@@ -47,9 +49,7 @@ export function AppSidebar() {
               <p className="text-foreground text-sm font-semibold">
                 {user.name}
               </p>
-              <p className="text-muted-foreground text-xs">
-                @{user.rollNumber}
-              </p>
+              <p className="text-muted-foreground text-xs">@{user.roll}</p>
             </div>
           </Link>
         ) : null}

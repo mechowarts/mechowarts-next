@@ -8,8 +8,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
-import { useAuth } from '@/hooks/use-auth'
 import { listUsers } from '@/server/actions/users.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -34,10 +34,11 @@ function getFacebookUrl(facebookId: string) {
 
 export function AllUsersPage() {
   const router = useRouter()
-  const { user } = useAuth()
-  const currentUserRollNumber =
-    user && 'rollNumber' in user && typeof user.rollNumber === 'number'
-      ? user.rollNumber
+  const user = useAuthStore((store) => store.user)
+
+  const currentUserRoll =
+    user && 'roll' in user && typeof user.roll === 'number'
+      ? user.roll
       : undefined
   const allUsersQuery = useQuery({
     queryKey: ['users'],
@@ -50,11 +51,9 @@ export function AllUsersPage() {
 
   const users = useMemo(() => {
     return (allUsersQuery.data ?? []).filter(
-      (user) =>
-        user.visibility !== 'private' ||
-        user.rollNumber === currentUserRollNumber
+      (user) => user.visibility !== 'private' || user.roll === currentUserRoll
     )
-  }, [allUsersQuery.data, currentUserRollNumber])
+  }, [allUsersQuery.data, currentUserRoll])
 
   const filteredUsers = useMemo(() => {
     let nextUsers = users
@@ -65,7 +64,7 @@ export function AllUsersPage() {
         (user) =>
           user.name.toLowerCase().includes(loweredSearch) ||
           user.email.toLowerCase().includes(loweredSearch) ||
-          String(user.rollNumber ?? '').includes(searchTerm)
+          String(user.roll ?? '').includes(searchTerm)
       )
     }
 
@@ -80,7 +79,7 @@ export function AllUsersPage() {
         return left.name.localeCompare(right.name)
       }
 
-      return (left.rollNumber ?? 0) - (right.rollNumber ?? 0)
+      return (left.roll ?? 0) - (right.roll ?? 0)
     })
   }, [bloodGroupFilter, searchTerm, sortBy, users])
 
@@ -169,8 +168,7 @@ export function AllUsersPage() {
               <>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
                   {paginatedUsers.map((user) => {
-                    const isCurrentUser =
-                      user.rollNumber === currentUserRollNumber
+                    const isCurrentUser = user.roll === currentUserRoll
 
                     return (
                       <div
@@ -182,7 +180,7 @@ export function AllUsersPage() {
                         }
                         onClick={(event) => {
                           if (!(event.target as HTMLElement).closest('a')) {
-                            router.push(`/profile/${user.rollNumber}`)
+                            router.push(`/profile/${user.roll}`)
                           }
                         }}
                       >
@@ -198,9 +196,9 @@ export function AllUsersPage() {
 
                           <h3 className="text-foreground mt-2 text-center text-lg font-bold">
                             {user.name}
-                            {user.rollNumber ? (
+                            {user.roll ? (
                               <span className="text-muted-foreground ml-2 text-xs">
-                                ({user.rollNumber})
+                                ({user.roll})
                               </span>
                             ) : null}
                             {isCurrentUser ? (
