@@ -2,9 +2,7 @@ import { authClient } from '@/lib/auth-client'
 import type { auth } from '@/server/lib/auth'
 import type { Prettify } from 'daily-code'
 
-type SessionData = Prettify<typeof auth.$Infer.Session>
-
-export type AuthSessionUser = SessionData['user']
+export type AuthSessionUser = Prettify<typeof auth.$Infer.Session.user>
 
 type UnauthenticatedState = {
   state: 'loading' | 'unauthenticated'
