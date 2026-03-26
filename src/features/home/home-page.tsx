@@ -1,3 +1,5 @@
+'use client'
+
 import { Spinner } from '@/components/ui/spinner'
 import { CreatePostModal } from '@/features/posts/create-post-modal'
 import { listPosts } from '@/server/actions/posts.actions'

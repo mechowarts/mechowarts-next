@@ -18,8 +18,9 @@ import { PropsWithChildren } from 'react'
 export default function MainLayout({ children }: PropsWithChildren) {
   const router = useRouter()
   const pathname = usePathname()
-  const status = useAuthStore((store) => store.status)
+
   const user = useAuthStore((store) => store.user)
+  const status = useAuthStore((store) => store.status)
 
   const signOutMutation = useMutation({
     mutationFn: signOutAction,

@@ -1,7 +1,7 @@
 'use client'
 
 import { useAuthStore } from '@/store/use-auth-store'
-import { redirect } from 'next/navigation'
+import { redirect, RedirectType } from 'next/navigation'
 import { PropsWithChildren } from 'react'
 
 export default function ProtectedLayout({ children }: PropsWithChildren) {
@@ -11,5 +11,9 @@ export default function ProtectedLayout({ children }: PropsWithChildren) {
     return children
   }
 
-  return redirect('/all-users')
+  if (status === 'loading') {
+    return null
+  }
+
+  return redirect('/all-users', RedirectType.replace)
 }
