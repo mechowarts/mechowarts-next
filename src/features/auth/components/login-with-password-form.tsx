@@ -101,7 +101,7 @@ export function LoginWithPasswordForm({
 
         {!userQuery.isLoading && userQuery.data ? (
           <div className="space-y-6">
-            <div className="bg-muted flex items-center gap-4 rounded-xl border p-4">
+            <div className="bg-muted/40 flex items-center gap-4 rounded-xl border p-4">
               <Avatar className="bg-background size-12 border">
                 <AvatarImage
                   src={userQuery.data.avatar ?? undefined}
