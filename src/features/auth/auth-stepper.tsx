@@ -8,48 +8,48 @@ interface AuthStepperProps {
   stepHistory: ProgressiveAuthStep[]
 }
 
+const stepLabels: Record<ProgressiveAuthStep, string> = {
+  login: 'Sign in',
+  register: 'Register',
+  roll: 'Roll number',
+}
+
 export function AuthStepper({
   currentStepIndex,
   goToStep,
   stepHistory,
 }: AuthStepperProps) {
   return (
-    <div className="mb-6 flex items-center justify-center gap-0">
+    <div className="grid gap-3 sm:grid-cols-3">
       {stepHistory.map((step, index) => {
         const isActive = index === currentStepIndex
         const isCompleted = index < currentStepIndex
 
         return (
-          <div key={`${step}-${index}`} className="contents">
-            <Button
-              type="button"
-              variant="outline"
-              size="icon"
-              disabled={!isCompleted}
-              onClick={() => goToStep(index)}
-              className={cn(
-                'rounded-full border-2 text-sm font-semibold transition-colors duration-200',
-                isActive &&
-                  'border-primary bg-primary text-primary-foreground shadow-lg',
-                isCompleted &&
-                  'border-primary bg-primary/30 text-primary hover:ring-primary/30 hover:ring-2',
-                !isActive &&
-                  !isCompleted &&
-                  'border-border bg-muted text-muted-foreground cursor-default'
-              )}
-            >
-              {index + 1}
-            </Button>
-
-            {index < stepHistory.length - 1 ? (
-              <span
-                className={cn(
-                  'mx-1 h-1 w-8 rounded-full',
-                  isCompleted ? 'bg-primary' : 'bg-muted'
-                )}
-              />
-            ) : null}
-          </div>
+          <Button
+            key={`${step}-${index}`}
+            type="button"
+            variant="ghost"
+            disabled={!isCompleted}
+            onClick={() => goToStep(index)}
+            className={cn(
+              'h-auto min-h-20 justify-start rounded-3xl border px-4 py-4 text-left transition-all',
+              isActive &&
+                'border-slate-900 bg-slate-950 text-white shadow-[0_16px_40px_-24px_rgba(15,23,42,0.9)] hover:bg-slate-900',
+              isCompleted &&
+                'border-emerald-200 bg-emerald-50 text-emerald-900 hover:bg-emerald-100',
+              !isActive &&
+                !isCompleted &&
+                'cursor-default border-slate-200 bg-slate-50 text-slate-500 hover:bg-slate-50'
+            )}
+          >
+            <div className="space-y-1">
+              <div className="text-xs font-semibold tracking-[0.22em] uppercase opacity-80">
+                Step {index + 1}
+              </div>
+              <div className="text-base font-semibold">{stepLabels[step]}</div>
+            </div>
+          </Button>
         )
       })}
     </div>

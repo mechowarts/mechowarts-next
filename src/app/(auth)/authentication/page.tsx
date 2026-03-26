@@ -1,7 +1,7 @@
 'use client'
 
-import { AuthenticationPage } from '@/features/auth/authentication-page'
+import { ProgressiveAuthPage } from '@/features/auth/progressive-auth-page'
 
 export default function AuthenticationRoutePage() {
-  return <AuthenticationPage />
+  return <ProgressiveAuthPage />
 }

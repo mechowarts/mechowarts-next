@@ -53,7 +53,7 @@ export function VerifyEmailPage() {
       <Button
         className="w-full"
         onClick={() => {
-          router.push(`/authentication/progressive?roll=${roll}&step=register`)
+          router.push(`/authentication?roll=${roll}&step=register`)
         }}
       >
         Continue to Registration

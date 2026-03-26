@@ -1,7 +1,12 @@
 import { apiRequest } from '@/api/http/client'
 import { authClient } from '@/lib/auth-client'
 import type {
+  AuthOtpRequestPayload,
+  AuthOtpRequestResponse,
+  AuthOtpVerifyPayload,
+  AuthOtpVerifyResponse,
   NewUserPayload,
+  RegisterWithOtpPayload,
   ResetPasswordPayload,
   SignInPayload,
 } from '@/types'
@@ -57,9 +62,53 @@ export async function createUserAccount(payload: NewUserPayload) {
   return response
 }
 
-export async function resetPassword(payload: ResetPasswordPayload) {
-  return apiRequest<{ success: boolean }>('/api/auth/reset-password', {
+export async function requestRegisterOtp(payload: AuthOtpRequestPayload) {
+  return apiRequest<AuthOtpRequestResponse>('/api/auth/register/request-otp', {
     method: 'POST',
     json: payload,
   })
+}
+
+export async function verifyRegisterOtp(payload: AuthOtpVerifyPayload) {
+  return apiRequest<AuthOtpVerifyResponse>('/api/auth/register/verify-otp', {
+    method: 'POST',
+    json: payload,
+  })
+}
+
+export async function registerWithOtp(payload: RegisterWithOtpPayload) {
+  return apiRequest<{ success: boolean }>('/api/auth/register', {
+    method: 'POST',
+    json: payload,
+  })
+}
+
+export async function requestResetPasswordOtp(payload: AuthOtpRequestPayload) {
+  return apiRequest<AuthOtpRequestResponse>(
+    '/api/auth/reset-password/request-otp',
+    {
+      method: 'POST',
+      json: payload,
+    }
+  )
+}
+
+export async function verifyResetPasswordOtp(payload: AuthOtpVerifyPayload) {
+  return apiRequest<AuthOtpVerifyResponse>(
+    '/api/auth/reset-password/verify-otp',
+    {
+      method: 'POST',
+      json: payload,
+    }
+  )
+}
+
+export async function resetPassword(payload: ResetPasswordPayload) {
+  return apiRequest<{ rollNumber: number; success: boolean }>(
+    '/api/auth/reset-password',
+    {
+      method: 'POST',
+      json: payload,
+    }
+  )
 }

@@ -1,8 +1,15 @@
 export type {
+  AuthOtpRequestPayload,
+  AuthOtpRequestResponse,
+  AuthOtpVerifyPayload,
+  AuthOtpVerifyResponse,
   NewUserPayload,
   ProfileData,
   ProgressiveAuthStep,
   RegisterData,
+  RegisterOtpPayload,
+  RegisterWithOtpPayload,
+  ResetPasswordOtpPayload,
   ResetPasswordPayload,
   SignInPayload,
 } from '@/types/auth'

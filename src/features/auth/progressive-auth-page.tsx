@@ -1,18 +1,15 @@
-import { createUserAccount, signInAccount } from '@/api/http/auth'
-import { completeUserProfile, getUserByRoll } from '@/api/http/users'
+import { registerWithOtp, signInAccount } from '@/api/http/auth'
+import { getUserByRoll } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { AuthStepper } from '@/features/auth/auth-stepper'
 import { AuthUserPreview } from '@/features/auth/auth-user-preview'
 import { LoginForm } from '@/features/auth/login-form'
-import { ProgressiveProfileStep } from '@/features/auth/progressive-profile-step'
 import { ProgressiveRegisterStep } from '@/features/auth/progressive-register-step'
 import { RollInput } from '@/features/auth/roll-input'
-import { useAuth } from '@/hooks/use-auth'
 import type { ProgressiveAuthStep } from '@/types'
 import { useMutation } from '@tanstack/react-query'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useEffect, useState } from 'react'
-import 'react-phone-input-2/lib/style.css'
 import { toast } from 'sonner'
 
 function getStepFromSearchParams(
@@ -23,8 +20,6 @@ function getStepFromSearchParams(
   switch (step) {
     case 'login':
     case 'register':
-    case 'profile':
-    case 'logged-in':
       return step
     default:
       return 'roll'
@@ -34,8 +29,6 @@ function getStepFromSearchParams(
 export function ProgressiveAuthPage() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { user } = useAuth()
-  const currentUserId = user?.id
   const [step, setStep] = useState<ProgressiveAuthStep>(
     getStepFromSearchParams(searchParams)
   )
@@ -49,11 +42,8 @@ export function ProgressiveAuthPage() {
   const signInMutation = useMutation({
     mutationFn: signInAccount,
   })
-  const createUserAccountMutation = useMutation({
-    mutationFn: createUserAccount,
-  })
-  const completeUserProfileMutation = useMutation({
-    mutationFn: completeUserProfile,
+  const registerMutation = useMutation({
+    mutationFn: registerWithOtp,
   })
 
   useEffect(() => {
@@ -73,6 +63,8 @@ export function ProgressiveAuthPage() {
           return
         }
 
+        setPreviewName('')
+        setPreviewAvatarUrl('')
         setStep('register')
         setStepHistory(['roll', 'register'])
       } catch (error) {
@@ -86,11 +78,8 @@ export function ProgressiveAuthPage() {
   }, [roll])
 
   const currentStepIndex = Math.max(stepHistory.indexOf(step), 0)
-  const canGoBack = currentStepIndex > 0 && step !== 'logged-in'
-  const isBusy =
-    signInMutation.isPending ||
-    createUserAccountMutation.isPending ||
-    completeUserProfileMutation.isPending
+  const canGoBack = currentStepIndex > 0
+  const isBusy = signInMutation.isPending || registerMutation.isPending
 
   return (
     <div className="space-y-6">
@@ -111,12 +100,15 @@ export function ProgressiveAuthPage() {
 
       {step === 'roll' ? (
         <>
-          <h2 className="text-foreground mb-2 text-center text-2xl font-bold">
-            Welcome to MechoWarts
-          </h2>
-          <p className="text-muted-foreground mb-6 text-center">
-            Enter your roll number to continue.
-          </p>
+          <div className="text-center">
+            <h2 className="text-foreground text-2xl font-bold">
+              Welcome to MechoWarts
+            </h2>
+            <p className="text-muted-foreground mt-2">
+              Enter your roll number to continue with sign in or registration.
+            </p>
+          </div>
+
           <RollInput
             isLoading={isBusy}
             onSubmit={async (nextRoll) => {
@@ -133,6 +125,8 @@ export function ProgressiveAuthPage() {
                   return
                 }
 
+                setPreviewName('')
+                setPreviewAvatarUrl('')
                 setStep('register')
                 setStepHistory(['roll', 'register'])
               } catch (error) {
@@ -153,6 +147,9 @@ export function ProgressiveAuthPage() {
           />
           <LoginForm
             isLoading={isBusy}
+            onForgot={() => {
+              router.push(`/reset-password?roll=${roll}`)
+            }}
             onSubmit={({ password }) => {
               signInMutation.mutate(
                 { password, rollNumber: Number.parseInt(roll, 10) },
@@ -178,18 +175,54 @@ export function ProgressiveAuthPage() {
       {step === 'register' ? (
         <ProgressiveRegisterStep
           isBusy={isBusy}
-          onRegisterSubmit={({ firstName, lastName, password }) => {
+          roll={roll}
+          onRegisterSubmit={({
+            bio,
+            bloodGroup,
+            facebookUrl,
+            firstName,
+            homeTown,
+            lastName,
+            password,
+            phone,
+            tokens,
+            otp,
+          }) => {
             const name = `${firstName} ${lastName}`.trim()
 
-            createUserAccountMutation.mutate(
+            registerMutation.mutate(
               {
+                bio,
+                bloodGroup,
+                facebookUrl: facebookUrl || undefined,
+                homeTown,
                 name,
+                otp,
                 password,
+                phone: phone || undefined,
                 rollNumber: Number.parseInt(roll, 10),
+                tokens,
               },
               {
-                onSuccess() {
-                  window.location.assign('/')
+                async onSuccess() {
+                  toast.success('Account created. Signing you in...')
+
+                  try {
+                    await signInAccount({
+                      password,
+                      rollNumber: Number.parseInt(roll, 10),
+                    })
+                    window.location.assign('/')
+                  } catch (error) {
+                    toast.success(
+                      'Account created. Please sign in to continue.'
+                    )
+                    router.push(`/authentication/login/${roll}`)
+
+                    if (error instanceof Error) {
+                      toast.error(error.message)
+                    }
+                  }
                 },
                 onError(error) {
                   toast.error(
@@ -202,56 +235,6 @@ export function ProgressiveAuthPage() {
             )
           }}
         />
-      ) : null}
-
-      {step === 'profile' ? (
-        <ProgressiveProfileStep
-          isLoading={completeUserProfileMutation.isPending}
-          onSkip={() => {
-            router.push('/')
-          }}
-          onSubmit={(profileData) => {
-            if (!currentUserId) {
-              toast.error('You need to be signed in to complete your profile.')
-              return
-            }
-
-            completeUserProfileMutation.mutate(
-              {
-                id: currentUserId,
-                rollNumber: Number.parseInt(roll, 10),
-                name: profileData.name,
-                avatarUrl:
-                  previewAvatarUrl || '/assets/icons/profile-placeholder.svg',
-                bio: profileData.bio,
-                bloodGroup: profileData.bloodGroup,
-                homeTown: profileData.homeTown,
-                colleges: profileData.colleges,
-                schools: profileData.schools,
-              },
-              {
-                onSuccess() {
-                  toast.success('Profile completed successfully.')
-                  router.push('/')
-                },
-                onError(error) {
-                  toast.error(
-                    error instanceof Error
-                      ? error.message
-                      : 'Failed to complete profile.'
-                  )
-                },
-              }
-            )
-          }}
-        />
-      ) : null}
-
-      {step === 'logged-in' ? (
-        <div className="border-border bg-card rounded-3xl border p-8 text-center">
-          <h2 className="text-primary mb-2 text-2xl font-bold">Logged in!</h2>
-          <p className="text-muted-foreground">Welcome to MechoWarts.</p>
-        </div>
       ) : null}
 
       {canGoBack ? (

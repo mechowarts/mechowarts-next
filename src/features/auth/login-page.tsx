@@ -23,7 +23,7 @@ export function LoginPage() {
 
   useEffect(() => {
     if (!userQuery.isLoading && !userQuery.data && roll) {
-      router.replace(`/authentication/verify-email/${roll}`)
+      router.replace(`/authentication?roll=${roll}&step=register`)
     }
   }, [roll, router, userQuery.data, userQuery.isLoading])
 
