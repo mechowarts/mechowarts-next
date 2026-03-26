@@ -7,7 +7,6 @@
     "db:init": "prisma generate && prisma db push",
     "db:studio": "prisma studio",
     "prepare": "husky",
-    "tc": "tsc --noEmit",
     "lint": "tsc --noEmit && eslint .",
     "lint:fix": "eslint . --fix",
     "lint:format": "prettier . --write"
