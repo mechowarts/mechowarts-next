@@ -5,6 +5,7 @@ import {
 } from '@/features/auth/components/register-request-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { AuthLayout } from './components/auth-layout'
 
 export function RegisterPage() {
   const router = useRouter()
@@ -27,7 +28,7 @@ export function RegisterPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <AuthLayout>
       {data && data.tokens.length > 0 ? (
         <RegisterConfirmForm
           data={data}
@@ -42,6 +43,6 @@ export function RegisterPage() {
           onSubmit={setData}
         />
       )}
-    </div>
+    </AuthLayout>
   )
 }

@@ -2,6 +2,7 @@ import { LoginStartForm } from '@/features/auth/components/login-start-form'
 import { LoginWithPasswordForm } from '@/features/auth/components/login-with-password-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { AuthLayout } from './components/auth-layout'
 
 export function LoginPage() {
   const router = useRouter()
@@ -12,7 +13,7 @@ export function LoginPage() {
   )
 
   return (
-    <div className="space-y-6">
+    <AuthLayout>
       {selectedRoll ? (
         <LoginWithPasswordForm
           roll={selectedRoll}
@@ -29,6 +30,6 @@ export function LoginPage() {
           }}
         />
       )}
-    </div>
+    </AuthLayout>
   )
 }

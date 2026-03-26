@@ -5,6 +5,7 @@ import {
 } from '@/features/auth/components/forget-password-request-form'
 import { useRouter, useSearchParams } from 'next/navigation'
 import { useState } from 'react'
+import { AuthLayout } from './components/auth-layout'
 
 export function ForgotPasswordPage() {
   const router = useRouter()
@@ -16,7 +17,7 @@ export function ForgotPasswordPage() {
   })
 
   return (
-    <div className="space-y-6">
+    <AuthLayout>
       {data && data.tokens.length > 0 ? (
         <ForgetPasswordConfirmForm
           data={data}
@@ -31,6 +32,6 @@ export function ForgotPasswordPage() {
           onSubmit={setData}
         />
       )}
-    </div>
+    </AuthLayout>
   )
 }

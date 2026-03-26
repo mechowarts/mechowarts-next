@@ -4,7 +4,7 @@ import { AppSidebar } from '@/components/app-sidebar'
 import { Logo } from '@/components/brand/logo'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
-import { bottomBarLinks } from '@/constants/navigation'
+import { sidebarLinks } from '@/constants/navigation'
 import { cn } from '@/lib/utils'
 import { signOutAction } from '@/server/actions/auth.actions'
 import { useAuthStore } from '@/store/use-auth-store'
@@ -99,28 +99,30 @@ export default function MainLayout({ children }: PropsWithChildren) {
       <section className="flex h-full flex-1">{children}</section>
 
       <section className="border-border bg-background/95 fixed right-0 bottom-0 left-0 z-40 flex items-center justify-around border-t px-4 py-2 backdrop-blur md:hidden">
-        {bottomBarLinks.map((link) => {
-          const isActive = pathname === link.route
+        {sidebarLinks
+          .filter((link) => link.isOnBottomBar)
+          .map((link) => {
+            const isActive = pathname === link.route
 
-          if (link.isPrivate && !user) {
-            return null
-          }
+            if (link.isPrivate && !user) {
+              return null
+            }
 
-          return (
-            <Link
-              key={link.label}
-              href={link.route}
-              className={cn(
-                'group text-foreground hover:bg-accent hover:text-accent-foreground flex h-16 w-20 flex-col items-center gap-1 rounded-[10px] p-2 text-xs transition',
-                isActive && 'bg-primary text-primary-foreground'
-              )}
-            >
-              <HugeiconsIcon icon={link.icon} className="h-6 w-6" />
+            return (
+              <Link
+                key={link.label}
+                href={link.route}
+                className={cn(
+                  'group text-foreground hover:bg-accent hover:text-accent-foreground flex h-16 w-20 flex-col items-center gap-1 rounded-[10px] p-2 text-xs transition',
+                  isActive && 'bg-primary text-primary-foreground'
+                )}
+              >
+                <HugeiconsIcon icon={link.icon} className="h-6 w-6" />
 
-              <span className="text-xs">{link.label}</span>
-            </Link>
-          )
-        })}
+                <span className="text-xs">{link.label}</span>
+              </Link>
+            )
+          })}
       </section>
     </div>
   )

@@ -13,6 +13,7 @@ interface NavigationItem {
   route: string
   label: string
   isPrivate?: boolean
+  isOnBottomBar?: boolean
 }
 
 export const sidebarLinks: NavigationItem[] = [
@@ -21,22 +22,26 @@ export const sidebarLinks: NavigationItem[] = [
     route: '/',
     label: 'Home',
     isPrivate: true,
+    isOnBottomBar: true,
   },
   {
     icon: MapsSearchIcon,
     route: '/explore',
     label: 'Explore',
     isPrivate: true,
+    isOnBottomBar: true,
   },
   {
     icon: UserGroupIcon,
     route: '/users',
     label: 'People',
+    isOnBottomBar: true,
   },
   {
     icon: Image01Icon,
     route: '/gallery',
     label: 'Gallery',
+    isOnBottomBar: true,
   },
   {
     icon: Bookmark01Icon,
@@ -48,35 +53,6 @@ export const sidebarLinks: NavigationItem[] = [
     icon: ToolsIcon,
     route: '/tools',
     label: 'Tools',
-  },
-]
-
-export const bottomBarLinks: NavigationItem[] = [
-  {
-    icon: Home01Icon,
-    route: '/',
-    label: 'Home',
-    isPrivate: true,
-  },
-  {
-    icon: MapsSearchIcon,
-    route: '/explore',
-    label: 'Explore',
-    isPrivate: true,
-  },
-  {
-    icon: UserGroupIcon,
-    route: '/users',
-    label: 'People',
-  },
-  {
-    icon: Image01Icon,
-    route: '/gallery',
-    label: 'Gallery',
-  },
-  {
-    icon: ToolsIcon,
-    route: '/tools',
-    label: 'Tools',
+    isOnBottomBar: true,
   },
 ]

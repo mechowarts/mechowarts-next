@@ -1,19 +1,22 @@
 'use client'
 
 import { useAuthStore } from '@/store/use-auth-store'
-import { redirect, RedirectType } from 'next/navigation'
-import { PropsWithChildren } from 'react'
+import { useRouter } from 'next/navigation'
+import { PropsWithChildren, useEffect } from 'react'
 
 export default function ProtectedLayout({ children }: PropsWithChildren) {
+  const router = useRouter()
   const status = useAuthStore((store) => store.status)
+
+  useEffect(() => {
+    if (status === 'unauthenticated') {
+      router.replace('/users')
+    }
+  }, [status, router])
 
   if (status === 'authenticated') {
     return children
   }
 
-  if (status === 'loading') {
-    return null
-  }
-
-  return redirect('/users', RedirectType.replace)
+  return null
 }
