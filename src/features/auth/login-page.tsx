@@ -24,8 +24,8 @@ export function LoginPage() {
       ) : (
         <LoginStartForm
           onSubmit={(data) => {
-            setSelectedRoll(data)
-            router.replace(`/login?roll=${data}`)
+            setSelectedRoll(data.roll)
+            router.replace(`/login?roll=${data.roll}`)
           }}
         />
       )}
