@@ -22,6 +22,7 @@ model User {
   visibility Visibility @default(public)
 
   bio        String?
+  gender     UserGender?
   avatar     String?
   location   String?
   bloodGroup String?
@@ -81,4 +82,9 @@ enum InstitutionKind {
 enum Visibility {
   public
   private
+}
+
+enum UserGender {
+  male
+  female
 }
