@@ -1,4 +1,4 @@
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -12,6 +12,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { Spinner } from '@/components/ui/spinner'
 import type { RegisterFlowData } from '@/features/auth/components/register-request-form'
 import {
   confirmRegisterOTPAction,
@@ -203,13 +204,13 @@ export function RegisterConfirmForm({
                   )
                 }}
               >
-                <Loading loading={resendMutation.isPending}>Resend OTP</Loading>
+                Resend OTP
+                {resendMutation.isPending && <Spinner />}
               </Button>
 
               <Button type="submit" className="rounded-full" disabled={isBusy}>
-                <Loading loading={registerMutation.isPending}>
-                  Verify and create account
-                </Loading>
+                Verify and create account
+                {registerMutation.isPending && <Spinner />}
               </Button>
             </div>
           </form>

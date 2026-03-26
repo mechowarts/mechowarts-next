@@ -1,4 +1,4 @@
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -16,6 +16,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { bloodGroups } from '@/constants/profile'
 import { ProfileAvatarPicker } from '@/features/profile/profile-avatar-picker'
@@ -489,7 +490,8 @@ export function UpdateProfilePage() {
                   className="min-w-[7.5rem]"
                   disabled={isSubmitting}
                 >
-                  <Loading loading={isSubmitting}>Save Changes</Loading>
+                  Save Changes
+                  {isSubmitting && <Spinner />}
                 </Button>
               </div>
             </form>

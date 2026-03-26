@@ -2,7 +2,7 @@ import {
   BetterDialog,
   BetterDialogContent,
 } from '@/components/ui/better-dialog'
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -11,6 +11,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import { Textarea } from '@/components/ui/textarea'
 import { createPost } from '@/server/actions/posts.actions'
 import { useMutation, useQueryClient } from '@tanstack/react-query'
@@ -111,7 +112,8 @@ export function CreatePostModal({ isOpen, onClose }: CreatePostModalProps) {
 
             <div className="mt-4 flex justify-end">
               <Button type="submit" disabled={createPostMutation.isPending}>
-                <Loading loading={createPostMutation.isPending}>Post</Loading>
+                Post
+                {createPostMutation.isPending && <Spinner />}
               </Button>
             </div>
           </form>

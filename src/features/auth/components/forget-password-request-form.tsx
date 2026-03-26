@@ -1,4 +1,4 @@
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -9,6 +9,7 @@ import {
   FormMessage,
 } from '@/components/ui/form'
 import { Input } from '@/components/ui/input'
+import { Spinner } from '@/components/ui/spinner'
 import { requestResetPasswordOTPAction } from '@/server/actions/auth.actions'
 import { buildStudentEmail, isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
@@ -125,9 +126,8 @@ export function ForgetPasswordRequestForm({
             className="h-11 w-full rounded-full"
             disabled={requestOtpMutation.isPending}
           >
-            <Loading loading={requestOtpMutation.isPending}>
-              Request OTP
-            </Loading>
+            Request OTP
+            {requestOtpMutation.isPending && <Spinner />}
           </Button>
 
           <p className="text-center text-sm text-slate-500">

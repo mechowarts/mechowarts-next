@@ -1,4 +1,4 @@
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -7,8 +7,11 @@ import {
   FormLabel,
   FormMessage,
 } from '@/components/ui/form'
+import { Spinner } from '@/components/ui/spinner'
 import { isValidRollNumber } from '@/utils/roll'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowRight01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import Link from 'next/link'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -66,9 +69,12 @@ export function LoginStartForm({ onSubmit }: LoginStartFormProps) {
                 size="lg"
                 className="w-full"
               >
-                <Loading loading={form.formState.isSubmitting}>
-                  Continue
-                </Loading>
+                Continue
+                {form.formState.isSubmitting ? (
+                  <Spinner />
+                ) : (
+                  <HugeiconsIcon icon={ArrowRight01Icon} />
+                )}
               </Button>
 
               <div className="flex items-center justify-center gap-3">

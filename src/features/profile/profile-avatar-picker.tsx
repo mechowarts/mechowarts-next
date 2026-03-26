@@ -69,7 +69,7 @@ export function ProfileAvatarPicker({
         </DropdownMenu>
         {isUploading ? (
           <div className="bg-background/80 absolute inset-0 flex items-center justify-center rounded-full">
-            <Spinner size="sm" />
+            <Spinner className="size-4" />
           </div>
         ) : null}
       </div>

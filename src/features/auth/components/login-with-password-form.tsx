@@ -1,5 +1,5 @@
 import { Avatar, AvatarFallback, AvatarImage } from '@/components/ui/avatar'
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -13,8 +13,9 @@ import { Spinner } from '@/components/ui/spinner'
 import { signInAction } from '@/server/actions/auth.actions'
 import { getUserByRoll } from '@/server/actions/users.actions'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { ArrowLeft01Icon } from '@hugeicons/core-free-icons'
+import { HugeiconsIcon } from '@hugeicons/react'
 import { useMutation, useQuery } from '@tanstack/react-query'
-import { ArrowLeft, KeyRound } from 'lucide-react'
 import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 import { useForm } from 'react-hook-form'
@@ -80,39 +81,27 @@ export function LoginWithPasswordForm({
   })
 
   return (
-    <div className="space-y-6">
-      <div className="space-y-3 text-center">
-        <div className="space-y-2">
-          <h1 className="text-3xl font-semibold tracking-tight text-slate-950">
+    <div className="mx-auto w-full max-w-sm">
+      <div className="rounded-2xl border border-slate-200 bg-white p-8">
+        <div className="mb-8 text-center">
+          <h1 className="mb-2 text-2xl font-semibold tracking-tight text-slate-900">
             Enter your password
           </h1>
-          <p className="text-sm leading-6 text-slate-600 sm:text-base">
-            We found your account. Confirm your password to finish signing in.
+          <p className="text-sm text-slate-500">
+            We found your account. Enter your password to continue.
           </p>
         </div>
-      </div>
-
-      <div className="space-y-5 rounded-3xl border border-slate-200 bg-white p-6">
-        <Button
-          type="button"
-          variant="ghost"
-          className="-ml-3 h-auto justify-start px-3 text-slate-600 hover:text-slate-900"
-          onClick={backToStart}
-        >
-          <ArrowLeft className="size-4" />
-          Change roll number
-        </Button>
 
         {userQuery.isLoading ? (
-          <div className="flex min-h-52 items-center justify-center">
+          <div className="flex min-h-40 items-center justify-center">
             <Spinner className="size-8" />
           </div>
         ) : null}
 
         {!userQuery.isLoading && userQuery.data ? (
-          <>
-            <div className="flex items-center gap-4 rounded-2xl border border-slate-200 bg-slate-50 p-4">
-              <Avatar className="size-14 border border-slate-200 bg-white">
+          <div className="space-y-6">
+            <div className="flex items-center gap-4 rounded-xl border border-slate-200 bg-slate-50 p-4">
+              <Avatar className="size-12 border border-slate-200 bg-white">
                 <AvatarImage
                   src={userQuery.data.avatar ?? undefined}
                   alt={userQuery.data.name}
@@ -121,14 +110,11 @@ export function LoginWithPasswordForm({
                   {getInitials(userQuery.data.name)}
                 </AvatarFallback>
               </Avatar>
-              <div className="space-y-1 text-left">
-                <p className="text-xs font-medium tracking-[0.2em] text-slate-500 uppercase">
-                  Account found
-                </p>
-                <p className="text-lg font-semibold text-slate-950">
+              <div className="flex-1">
+                <p className="font-semibold text-slate-900">
                   {userQuery.data.name}
                 </p>
-                <p className="text-sm text-slate-600">Roll {roll}</p>
+                <p className="text-sm text-slate-500">Roll {roll}</p>
               </div>
             </div>
 
@@ -179,26 +165,39 @@ export function LoginWithPasswordForm({
 
                 <Button
                   type="submit"
-                  className="h-11 w-full rounded-full"
+                  size="lg"
+                  className="w-full"
                   disabled={signInMutation.isPending}
                 >
-                  <Loading loading={signInMutation.isPending}>Sign in</Loading>
+                  Sign in
+                  {signInMutation.isPending && <Spinner />}
                 </Button>
 
-                <Button
-                  asChild
-                  type="button"
-                  variant="link"
-                  className="mx-auto flex h-auto px-0 text-sm text-slate-600"
-                >
-                  <Link href={`/forgot-password?roll=${roll}`}>
-                    <KeyRound className="size-4" />
-                    Forgot password?
-                  </Link>
-                </Button>
+                <div className="flex flex-col gap-2 pt-2">
+                  <Button
+                    asChild
+                    type="button"
+                    variant="link"
+                    className="h-auto px-0 text-sm text-slate-500"
+                  >
+                    <Link href={`/forgot-password?roll=${roll}`}>
+                      Forgot password?
+                    </Link>
+                  </Button>
+
+                  <Button
+                    type="button"
+                    variant="ghost"
+                    className="h-auto px-0 text-sm text-slate-500"
+                    onClick={backToStart}
+                  >
+                    <HugeiconsIcon icon={ArrowLeft01Icon} size={14} />
+                    Use different roll number
+                  </Button>
+                </div>
               </form>
             </Form>
-          </>
+          </div>
         ) : null}
       </div>
     </div>

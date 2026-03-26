@@ -1,4 +1,4 @@
-import { Button, Loading } from '@/components/ui/button'
+import { Button } from '@/components/ui/button'
 import {
   Form,
   FormControl,
@@ -13,6 +13,7 @@ import {
   InputOTPGroup,
   InputOTPSlot,
 } from '@/components/ui/input-otp'
+import { Spinner } from '@/components/ui/spinner'
 import type { ForgotPasswordFlowData } from '@/features/auth/components/forget-password-request-form'
 import {
   confirmResetPasswordOTPAction,
@@ -238,13 +239,13 @@ export function ForgetPasswordConfirmForm({
                   )
                 }}
               >
-                <Loading loading={resendMutation.isPending}>Resend OTP</Loading>
+                Resend OTP
+                {resendMutation.isPending && <Spinner />}
               </Button>
 
               <Button type="submit" className="rounded-full" disabled={isBusy}>
-                <Loading loading={resetPasswordMutation.isPending}>
-                  Verify and continue
-                </Loading>
+                Verify and continue
+                {resetPasswordMutation.isPending && <Spinner />}
               </Button>
             </div>
           </form>

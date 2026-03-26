@@ -1,26 +1,16 @@
 import { cn } from '@/lib/utils'
-import { Loader2 } from 'lucide-react'
-import { HTMLAttributes } from 'react'
+import { type ComponentPropsWithoutRef } from 'react'
+import { LuLoader } from 'react-icons/lu'
 
-interface SpinnerProps extends HTMLAttributes<HTMLDivElement> {
-  size?: 'sm' | 'md' | 'lg'
-}
+type SpinnerProps = ComponentPropsWithoutRef<'svg'>
 
-function Spinner({ className, size = 'md', ...props }: SpinnerProps) {
-  const sizeClasses = {
-    sm: 'h-4 w-4',
-    md: 'h-6 w-6',
-    lg: 'h-8 w-8',
-  }
-
+export function Spinner({ className, ...props }: SpinnerProps) {
   return (
-    <div
-      className={cn('animate-spin', sizeClasses[size], className)}
+    <LuLoader
+      width="1em"
+      height="1em"
+      className={cn('shrink-0 animate-spin', className)}
       {...props}
-    >
-      <Loader2 className="h-full w-full" />
-    </div>
+    />
   )
 }
-
-export { Spinner }
