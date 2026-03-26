@@ -1,63 +1,91 @@
-import { prisma } from '@/server/lib/prisma'
-import { readSessionToken } from '@/server/lib/session-auth'
+'use server'
+import 'server-only'
 
-export async function getSession() {
-  const token = await readSessionToken()
+import { serverEnv } from '@/env.server'
+import { prisma } from '@/server/lib/prisma'
+import { SignJWT, jwtVerify } from 'jose'
+import ms from 'ms'
+import { cookies } from 'next/headers'
+
+const sessionCookieName = 'mechowarts_session'
+const sessionDurationSeconds = ms('30d') / 1000
+const jwtSecret = new TextEncoder().encode(serverEnv.JWT_SECRET)
+
+type SessionTokenInput = {
+  pca: number | null
+  sub: string
+}
+
+type SessionTokenOutput = SessionTokenInput & {
+  iat: number
+}
+
+export async function getSessionToken(): Promise<SessionTokenOutput | null> {
+  const cookieStore = await cookies()
+  const token = cookieStore.get(sessionCookieName)?.value
 
   if (!token) {
     return null
   }
 
-  const user = await prisma.user.findUnique({
-    where: { id: token.userId },
-    select: {
-      id: true,
-      email: true,
-      name: true,
-      roll: true,
-      avatar: true,
-      bio: true,
-      bloodGroup: true,
-      location: true,
-      phone: true,
-      facebookId: true,
-      visibility: true,
-      passwordChangedAt: true,
-      institutions: {
-        select: {
-          id: true,
-          kind: true,
-          name: true,
-          location: true,
-        },
-      },
-    },
-  })
+  try {
+    const { payload } = await jwtVerify(token, jwtSecret)
+    return payload as SessionTokenOutput
+  } catch {
+    return null
+  }
+}
 
+export async function setSessionCookie(payload: SessionTokenInput) {
+  const token = await new SignJWT({ pca: payload.pca })
+    .setProtectedHeader({ alg: 'HS256' })
+    .setIssuedAt()
+    .setExpirationTime(`${sessionDurationSeconds}s`)
+    .setSubject(payload.sub)
+    .sign(jwtSecret)
+
+  const cookieStore = await cookies()
+
+  cookieStore.set(sessionCookieName, token, {
+    httpOnly: true,
+    maxAge: sessionDurationSeconds,
+    path: '/',
+    sameSite: 'lax',
+    secure: process.env.NODE_ENV === 'production',
+  })
+}
+
+export async function clearSessionCookie() {
+  const cookieStore = await cookies()
+  cookieStore.delete(sessionCookieName)
+}
+
+export async function getAuthUser() {
+  const token = await getSessionToken()
+  if (!token) {
+    return null
+  }
+
+  const user = await prisma.user.findUnique({
+    where: { id: token.sub },
+    omit: { password: true },
+  })
   if (!user) {
     return null
   }
 
-  if (user.passwordChangedAt) {
-    const issuedAtMilliseconds = token.issuedAt * 1000
-
-    if (user.passwordChangedAt.getTime() > issuedAtMilliseconds) {
-      return null
-    }
+  if (
+    user.passwordChangedAt != null &&
+    user.passwordChangedAt.getTime() > token.iat * 1000
+  ) {
+    return null
   }
 
-  const { passwordChangedAt: _, ...sessionUser } = user
-
-  return {
-    user: {
-      ...sessionUser,
-      rollNumber: sessionUser.roll,
-    },
-  }
+  return user
 }
 
-export async function requireSession() {
-  const session = await getSession()
+export async function requireAuthUser() {
+  const session = await getAuthUser()
 
   if (!session) {
     throw new Error('Unauthorized.')
@@ -65,3 +93,5 @@ export async function requireSession() {
 
   return session
 }
+
+export type AuthUser = NonNullable<Awaited<ReturnType<typeof getAuthUser>>>
