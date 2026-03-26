@@ -15,7 +15,6 @@
   "dependencies": {
     "@aws-sdk/client-s3": "^3.1016.0",
     "@better-auth/prisma-adapter": "^1.5.6",
-    "@fontsource-variable/geist": "^5.2.8",
     "@hugeicons/core-free-icons": "^4.0.0",
     "@hugeicons/react": "^1.1.6",
     "@prisma/adapter-pg": "^7.5.0",
