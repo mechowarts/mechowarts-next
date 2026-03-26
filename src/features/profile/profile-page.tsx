@@ -1,8 +1,8 @@
-import { getUserByRoll } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { Spinner } from '@/components/ui/spinner'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs'
-import { useAuth } from '@/hooks/use-auth'
+import { getUserByRoll } from '@/server/actions/users.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import Link from 'next/link'
@@ -18,22 +18,43 @@ import {
   FaWhatsapp,
 } from 'react-icons/fa6'
 
+function getFacebookUrl(facebookId: string) {
+  const trimmed = facebookId.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+
+  return `https://facebook.com/${trimmed}`
+}
+
 export function ProfilePage() {
   const router = useRouter()
   const params = useParams<{ id: string }>()
   const id = typeof params.id === 'string' ? params.id : ''
-  const { user } = useAuth()
-  const currentUserRollNumber =
-    user && 'rollNumber' in user && typeof user.rollNumber === 'number'
-      ? user.rollNumber
+  const user = useAuthStore((store) => store.user)
+
+  const currentUserRoll =
+    user && 'roll' in user && typeof user.roll === 'number'
+      ? user.roll
       : undefined
   const profileQuery = useQuery({
     queryKey: ['profile', id],
     queryFn: () => getUserByRoll(id),
     enabled: Boolean(id),
   })
+  const colleges = (profileQuery.data?.institutions ?? []).filter(
+    (institution) => institution.kind === 'college'
+  )
+  const schools = (profileQuery.data?.institutions ?? []).filter(
+    (institution) => institution.kind === 'school'
+  )
   const [activeTab, setActiveTab] = useState<'info' | 'posts'>('info')
-  const isOwnProfile = id === String(currentUserRollNumber)
+  const isOwnProfile = id === String(currentUserRoll)
 
   if (profileQuery.isLoading) {
     return (
@@ -51,7 +72,7 @@ export function ProfilePage() {
     )
   }
 
-  if (profileQuery.data.isPublic === false && !isOwnProfile) {
+  if (profileQuery.data.visibility === 'private' && !isOwnProfile) {
     return (
       <div className="flex flex-1 items-center justify-center">
         <div className="border-border bg-card max-w-md rounded-xl border p-8 text-center">
@@ -62,7 +83,7 @@ export function ProfilePage() {
           <p className="text-muted-foreground mb-4">
             This profile is set to private and cannot be viewed.
           </p>
-          <Button onClick={() => router.push('/all-users')}>
+          <Button onClick={() => router.push('/users')}>
             Back to All Users
           </Button>
         </div>
@@ -88,7 +109,7 @@ export function ProfilePage() {
 
           <img
             src={
-              profileQuery.data.avatarUrl ||
+              profileQuery.data.avatar ||
               '/assets/icons/profile-placeholder.svg'
             }
             alt={profileQuery.data.name}
@@ -97,7 +118,7 @@ export function ProfilePage() {
 
           <h1 className="text-foreground mt-2 flex items-center justify-center gap-2 text-3xl font-bold">
             {profileQuery.data.name}
-            {profileQuery.data.isPublic ? (
+            {profileQuery.data.visibility === 'public' ? (
               <span title="Public">Public</span>
             ) : (
               <span title="Private">Private</span>
@@ -127,9 +148,9 @@ export function ProfilePage() {
               </a>
             ) : null}
 
-            {profileQuery.data.facebookUrl ? (
+            {profileQuery.data.facebookId ? (
               <a
-                href={profileQuery.data.facebookUrl}
+                href={getFacebookUrl(profileQuery.data.facebookId)}
                 target="_blank"
                 rel="noreferrer"
                 className="bg-secondary text-secondary-foreground hover:bg-secondary/90 flex min-w-36 items-center justify-center gap-2 rounded-lg px-5 py-3 text-lg font-semibold transition"
@@ -165,18 +186,17 @@ export function ProfilePage() {
                     </div>
                   ) : null}
 
-                  {profileQuery.data.homeTown ? (
+                  {profileQuery.data.location ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaHouse className="text-primary mr-1 inline-block" />{' '}
                         Home Town:
                       </span>{' '}
-                      {profileQuery.data.homeTown}
+                      {profileQuery.data.location}
                     </div>
                   ) : null}
 
-                  {profileQuery.data.colleges &&
-                  profileQuery.data.colleges.length > 0 ? (
+                  {colleges.length > 0 ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaBuildingColumns className="text-primary mr-1 inline-block" />{' '}
@@ -184,19 +204,16 @@ export function ProfilePage() {
                       </span>
 
                       <ul className="ml-4 list-disc">
-                        {profileQuery.data.colleges
-                          .filter(Boolean)
-                          .map((college, index) => (
-                            <li key={`college-${index}`}>
-                              {college.name || 'Unnamed College'}
-                            </li>
-                          ))}
+                        {colleges.map((college, index) => (
+                          <li key={`college-${index}`}>
+                            {college.name || 'Unnamed College'}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   ) : null}
 
-                  {profileQuery.data.schools &&
-                  profileQuery.data.schools.length > 0 ? (
+                  {schools.length > 0 ? (
                     <div className="text-foreground/90">
                       <span className="font-semibold">
                         <FaSchool className="text-primary mr-1 inline-block" />{' '}
@@ -204,13 +221,11 @@ export function ProfilePage() {
                       </span>
 
                       <ul className="ml-4 list-disc">
-                        {profileQuery.data.schools
-                          .filter(Boolean)
-                          .map((school, index) => (
-                            <li key={`school-${index}`}>
-                              {school.name || 'Unnamed School'}
-                            </li>
-                          ))}
+                        {schools.map((school, index) => (
+                          <li key={`school-${index}`}>
+                            {school.name || 'Unnamed School'}
+                          </li>
+                        ))}
                       </ul>
                     </div>
                   ) : null}

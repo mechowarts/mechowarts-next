@@ -1,0 +1,7 @@
+'use client'
+
+import { RegisterPage } from '@/features/auth/register-page'
+
+export default function RegisterRoutePage() {
+  return <RegisterPage />
+}

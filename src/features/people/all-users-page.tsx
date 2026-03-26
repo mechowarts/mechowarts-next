@@ -1,4 +1,3 @@
-import { getAllUsers } from '@/api/http/users'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
 import {
@@ -9,7 +8,8 @@ import {
   SelectValue,
 } from '@/components/ui/select'
 import { Spinner } from '@/components/ui/spinner'
-import { useAuth } from '@/hooks/use-auth'
+import { listUsers } from '@/server/actions/users.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { normalizeWhatsappPhone } from '@/utils/roll'
 import { useQuery } from '@tanstack/react-query'
 import { useRouter } from 'next/navigation'
@@ -18,17 +18,29 @@ import { FaDroplet, FaFacebook, FaHouse, FaWhatsapp } from 'react-icons/fa6'
 
 const usersPerPage = 9
 
+function getFacebookUrl(facebookId: string) {
+  const trimmed = facebookId.trim()
+
+  if (!trimmed) {
+    return ''
+  }
+
+  if (trimmed.startsWith('http://') || trimmed.startsWith('https://')) {
+    return trimmed
+  }
+
+  return `https://facebook.com/${trimmed}`
+}
+
 export function AllUsersPage() {
   const router = useRouter()
-  const { user } = useAuth()
-  const currentUserRollNumber =
-    user && 'rollNumber' in user && typeof user.rollNumber === 'number'
-      ? user.rollNumber
-      : undefined
+  const user = useAuthStore((store) => store.user)
+
   const allUsersQuery = useQuery({
     queryKey: ['users'],
-    queryFn: getAllUsers,
+    queryFn: listUsers,
   })
+
   const [searchTerm, setSearchTerm] = useState('')
   const [currentPage, setCurrentPage] = useState(1)
   const [bloodGroupFilter, setBloodGroupFilter] = useState('')
@@ -36,10 +48,9 @@ export function AllUsersPage() {
 
   const users = useMemo(() => {
     return (allUsersQuery.data ?? []).filter(
-      (user) =>
-        user.isPublic !== false || user.rollNumber === currentUserRollNumber
+      (u) => u.visibility !== 'private' || u.roll === user?.roll
     )
-  }, [allUsersQuery.data, currentUserRollNumber])
+  }, [allUsersQuery.data, user?.roll])
 
   const filteredUsers = useMemo(() => {
     let nextUsers = users
@@ -50,7 +61,7 @@ export function AllUsersPage() {
         (user) =>
           user.name.toLowerCase().includes(loweredSearch) ||
           user.email.toLowerCase().includes(loweredSearch) ||
-          String(user.rollNumber ?? '').includes(searchTerm)
+          String(user.roll ?? '').includes(searchTerm)
       )
     }
 
@@ -65,7 +76,7 @@ export function AllUsersPage() {
         return left.name.localeCompare(right.name)
       }
 
-      return (left.rollNumber ?? 0) - (right.rollNumber ?? 0)
+      return (left.roll ?? 0) - (right.roll ?? 0)
     })
   }, [bloodGroupFilter, searchTerm, sortBy, users])
 
@@ -153,13 +164,12 @@ export function AllUsersPage() {
             ) : (
               <>
                 <div className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                  {paginatedUsers.map((user) => {
-                    const isCurrentUser =
-                      user.rollNumber === currentUserRollNumber
+                  {paginatedUsers.map((u) => {
+                    const isCurrentUser = u.roll === user?.roll
 
                     return (
                       <div
-                        key={user.id}
+                        key={u.id}
                         className={
                           isCurrentUser
                             ? 'group ring-primary/30 hover:border-primary border-border bg-card hover:bg-accent/60 flex h-72 cursor-pointer flex-col justify-between gap-3 rounded-xl border p-5 ring-2 transition-all duration-200'
@@ -167,25 +177,25 @@ export function AllUsersPage() {
                         }
                         onClick={(event) => {
                           if (!(event.target as HTMLElement).closest('a')) {
-                            router.push(`/profile/${user.rollNumber}`)
+                            router.push(`/profile/${u.roll}`)
                           }
                         }}
                       >
                         <>
                           <img
                             src={
-                              user.avatarUrl ||
+                              u.avatar ||
                               '/assets/icons/profile-placeholder.svg'
                             }
-                            alt={user.name}
+                            alt={u.name}
                             className="group-hover:border-primary border-input h-16 w-16 rounded-full border object-cover transition-all duration-200"
                           />
 
                           <h3 className="text-foreground mt-2 text-center text-lg font-bold">
-                            {user.name}
-                            {user.rollNumber ? (
+                            {u.name}
+                            {u.roll ? (
                               <span className="text-muted-foreground ml-2 text-xs">
-                                ({user.rollNumber})
+                                ({u.roll})
                               </span>
                             ) : null}
                             {isCurrentUser ? (
@@ -196,25 +206,25 @@ export function AllUsersPage() {
                           </h3>
 
                           <div className="text-foreground/80 mt-1 flex items-center gap-2 text-xs">
-                            {user.bloodGroup ? (
+                            {u.bloodGroup ? (
                               <span className="flex items-center gap-1">
                                 <FaDroplet className="text-primary mr-1 inline-block" />
-                                {user.bloodGroup}
+                                {u.bloodGroup}
                               </span>
                             ) : null}
 
-                            {user.homeTown ? (
+                            {u.location ? (
                               <span className="flex items-center gap-1">
                                 <FaHouse className="text-primary mr-1 inline-block" />
-                                {user.homeTown}
+                                {u.location}
                               </span>
                             ) : null}
                           </div>
 
                           <div className="mt-2 flex gap-3">
-                            {user.phone ? (
+                            {u.phone ? (
                               <a
-                                href={`https://wa.me/${normalizeWhatsappPhone(user.phone)}`}
+                                href={`https://wa.me/${normalizeWhatsappPhone(u.phone)}`}
                                 target="_blank"
                                 rel="noreferrer"
                                 title="WhatsApp"
@@ -225,9 +235,9 @@ export function AllUsersPage() {
                               </a>
                             ) : null}
 
-                            {user.facebookUrl ? (
+                            {u.facebookId ? (
                               <a
-                                href={user.facebookUrl}
+                                href={getFacebookUrl(u.facebookId)}
                                 target="_blank"
                                 rel="noreferrer"
                                 title="Facebook"

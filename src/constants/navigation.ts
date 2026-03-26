@@ -1,4 +1,3 @@
-import type { NavigationItem } from '@/types'
 import {
   Bookmark01Icon,
   Home01Icon,
@@ -7,6 +6,15 @@ import {
   ToolsIcon,
   UserGroupIcon,
 } from '@hugeicons/core-free-icons'
+import { IconSvgElement } from '@hugeicons/react'
+
+interface NavigationItem {
+  icon: IconSvgElement
+  route: string
+  label: string
+  isPrivate?: boolean
+  isOnBottomBar?: boolean
+}
 
 export const sidebarLinks: NavigationItem[] = [
   {
@@ -14,22 +22,26 @@ export const sidebarLinks: NavigationItem[] = [
     route: '/',
     label: 'Home',
     isPrivate: true,
+    isOnBottomBar: true,
   },
   {
     icon: MapsSearchIcon,
     route: '/explore',
     label: 'Explore',
     isPrivate: true,
+    isOnBottomBar: true,
   },
   {
     icon: UserGroupIcon,
-    route: '/all-users',
+    route: '/users',
     label: 'People',
+    isOnBottomBar: true,
   },
   {
     icon: Image01Icon,
     route: '/gallery',
     label: 'Gallery',
+    isOnBottomBar: true,
   },
   {
     icon: Bookmark01Icon,
@@ -41,35 +53,6 @@ export const sidebarLinks: NavigationItem[] = [
     icon: ToolsIcon,
     route: '/tools',
     label: 'Tools',
-  },
-]
-
-export const bottomBarLinks: NavigationItem[] = [
-  {
-    icon: Home01Icon,
-    route: '/',
-    label: 'Home',
-    isPrivate: true,
-  },
-  {
-    icon: MapsSearchIcon,
-    route: '/explore',
-    label: 'Explore',
-    isPrivate: true,
-  },
-  {
-    icon: UserGroupIcon,
-    route: '/all-users',
-    label: 'People',
-  },
-  {
-    icon: Image01Icon,
-    route: '/gallery',
-    label: 'Gallery',
-  },
-  {
-    icon: ToolsIcon,
-    route: '/tools',
-    label: 'Tools',
+    isOnBottomBar: true,
   },
 ]

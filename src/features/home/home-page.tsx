@@ -1,17 +1,20 @@
-import { listPosts } from '@/api/http/posts'
+'use client'
+
 import { Spinner } from '@/components/ui/spinner'
 import { CreatePostModal } from '@/features/posts/create-post-modal'
-import { useAuth } from '@/hooks/use-auth'
+import { listPosts } from '@/server/actions/posts.actions'
+import { useAuthStore } from '@/store/use-auth-store'
 import { AddSquareIcon } from '@hugeicons/core-free-icons'
 import { HugeiconsIcon } from '@hugeicons/react'
 import { useQuery } from '@tanstack/react-query'
 import { useState } from 'react'
 
 export function HomePage() {
-  const { user } = useAuth()
+  const user = useAuthStore((store) => store.user)
+
   const avatarUrl =
-    user && 'avatarUrl' in user && typeof user.avatarUrl === 'string'
-      ? user.avatarUrl
+    user && 'avatar' in user && typeof user.avatar === 'string'
+      ? user.avatar
       : '/assets/icons/profile-placeholder.svg'
   const [isCreatePostOpen, setIsCreatePostOpen] = useState(false)
   const postsQuery = useQuery({
@@ -62,7 +65,7 @@ export function HomePage() {
                 >
                   <div className="mb-2 flex items-center justify-between">
                     <p className="text-foreground text-sm font-semibold">
-                      {post.authorName || 'Unknown user'}
+                      {post.author.name || 'Unknown user'}
                     </p>
                   </div>
 
